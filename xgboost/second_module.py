@@ -22,29 +22,21 @@ from sklearn import svm
 #  creating random genotyped data with the same size as the data used in the original manuscript
 
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
+X = pd.read_csv('hapmap_geno_recoded', sep=" ")
+Y = pd.read_csv('hapmap_phenotype_recoded', sep=" ")
 
-X = pd.read_csv('Xsubset.csv')
-Y = pd.read_csv('hapmap_phenotype_recoded')
-X = X.dropna(axis='columns')
-X.columns = np.arange(X.shape[1])
-X  = np.int64(X)
-Y= np.int64(Y)
-Y=Y.ravel()
 #print('before dropping: ',X.shape,X.columns)
-
+X = X.dropna(axis='columns')
 #Subsetting the dataset
 #X_subset = X.iloc[:,0:1001]
 #X_subset = pd.DataFrame(X_subset)
 #X_subset.to_csv('Xsubset.csv')
 #print(X.columns)
-# col = X.shape[0]
-# row = X.shape[1]
-#
-# nums = np.arange(0,row)
-# prevIndex = X.columns
-#changing indexing to numbers
-# X = pd.read_csv('Xsubset.csv',header=None)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 20874d92a749b0b41ccb556d30b6fc30273e363b
 # XGBoost achieved optimal hyperparameters [log_loss, {learning_rate, max_depth, n_estimators}]
 # for 10 iterative process.
 f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
@@ -85,7 +77,7 @@ def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices, m
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
     classifier.fit(XX_train[:, indices], YY_train)
     ts_score = classifier.predict_proba(XX_validation[:, indices])
-    precision, recall, _ = precision_recall_curve(YY_validation, ts_score[:, 1], pos_label=1)
+    precision, recall, _ = precision_recall_curve(YY_validation, ts_score[:, 1])
 
     return ts_score[:, 1]
 
@@ -93,6 +85,7 @@ def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices, m
 def cal_XGboost_feature_importance(X_train, Y_train, indices, model, X_test, Y_test):
     # # initial sort: algorithm 1 step 1
     model_1 = clone(model)
+
     eval_set = [(X_test[:, indices], Y_test)]
     model_1.fit(X_train[:, indices], Y_train, verbose=False, early_stopping_rounds=(model_1.n_estimators) / 10,
                 eval_metric="auc", eval_set=eval_set)
@@ -181,11 +174,11 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
     average_index_non_zero = list()
     print('printing score keys',len(xgboost_scores),xgboost_scores.keys())
 
-    for i in range(
-            len(xgboost_scores.keys())):
+    for i in range(len(xgboost_scores.keys())):
+        print("printing a key",i)
+        print('printing list',list(xgboost_scores))
         # getting indices of selected features from training set. Indices are in [0,125041]
         # converting xgboost_scores.keys() to list(xgboost_scores) to get the indexes of each of
-#        print("printing xgboost score",np.int64(list(xgboost_scores)[i]))
         average_index_non_zero.append(np.int64(list(xgboost_scores)[i][1:]))
 
     MM = [2, 4, 6, 8, 10, 20, 30]  # window size (Algorithm 1 step 2)
@@ -221,7 +214,7 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
                             # specific M, K, N, ii and CV
                             print('M: ' + str(M) + ' K: ' + str(KK) + ' N: ' + str(N) + ' ii: ' + str(ii))
                             global_returned_sorted.append(returned_sorted4[:ii])
-                            precision2, recall2, _ = precision_recall_curve(Y_test, ts_score1,pos_label=1)
+                            precision2, recall2, _ = precision_recall_curve(Y_test, ts_score1)
                             tot_roc.append(auc(recall2, precision2))
     #                            print(auc(recall2, precision2))
 
@@ -269,14 +262,16 @@ for i in range(NUM_TRIALS):
         print(test)
         print('Trying iloc')
         #using iloc instead of standard indexing
-        X_train = x[train]
-        Y_train = y[train]
-        X_test = x[test]
-        Y_test = y[test]
+        X_train = x.iloc[train]
+        Y_train = y.iloc[train]
+        X_test = x.iloc[test]
+        Y_test = y.iloc[test]
         print('X_train', X_train)
+        print('Y_train', Y_train)
         xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
         # if len(xgboost_scores1) == 0:
         #     continue
+       # print(xgboost_scores1)
         best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
         best_indices_cv_auc_recall.append(best_indices_au_recall)
 
