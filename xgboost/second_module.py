@@ -45,8 +45,6 @@ Y=Y.ravel()
 #changing indexing to numbers
 # X = pd.read_csv('Xsubset.csv',header=None)
 
-print(X,Y)
-
 # XGBoost achieved optimal hyperparameters [log_loss, {learning_rate, max_depth, n_estimators}]
 # for 10 iterative process.
 f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
