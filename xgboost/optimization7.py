@@ -13,8 +13,8 @@ np.random.seed(0)
 # loading data
 #  creating random genotyped data with the same size as the data used in the original manuscript
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
-X = pd.read_csv('hapmap_geno_recoded',sep=" ")
-Y = pd.read_csv('hapmap_phenotype_recoded',sep=" ")
+X = pd.read_csv('Xsubset.csv')
+Y = pd.read_csv('hapmap_phenotype_recoded')
 print(X.shape)
 print(Y.shape)
 
