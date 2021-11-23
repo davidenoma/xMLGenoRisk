@@ -22,7 +22,7 @@ from sklearn import svm
 #  creating random genotyped data with the same size as the data used in the original manuscript
 
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
-X = pd.read_csv('hapmap_geno_recoded', sep=" ",index_col=0)
+X = pd.read_csv('hapmap_geno_recoded', sep=" ")
 Y = pd.read_csv('hapmap_phenotype_recoded', sep=" ")
 
 #print('before dropping: ',X.shape,X.columns)
@@ -171,8 +171,9 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
     average_index_non_zero = list()
     print('printing score keys',len(xgboost_scores),xgboost_scores.keys())
 
-    for i in range(
-            len(xgboost_scores.keys())):
+    for i in range(len(xgboost_scores.keys())):
+        print("printing a key",i)
+        print('printing list',list(xgboost_scores))
         # getting indices of selected features from training set. Indices are in [0,125041]
         # converting xgboost_scores.keys() to list(xgboost_scores) to get the indexes of each of
         average_index_non_zero.append(np.int64(list(xgboost_scores)[i][1:]))
@@ -263,9 +264,11 @@ for i in range(NUM_TRIALS):
         X_test = x.iloc[test]
         Y_test = y.iloc[test]
         print('X_train', X_train)
+        print('Y_train', Y_train)
         xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
         # if len(xgboost_scores1) == 0:
         #     continue
+       # print(xgboost_scores1)
         best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
         best_indices_cv_auc_recall.append(best_indices_au_recall)
 
