@@ -17,8 +17,8 @@ np.random.seed(0)
 #696, 125041
 #X = np.random.randint(3, size=(200, 1000))
 #Y = np.random.randint(2, size=(200, ))
-X = pd.read_csv('Xsubset.csv')
-Y = pd.read_csv('hapmap_phenotype_recoded')
+X = pd.read_csv('../Xsubset.csv')
+Y = pd.read_csv('../hapmap_phenotype_recoded')
 print(X.shape)
 print(Y.shape)
 

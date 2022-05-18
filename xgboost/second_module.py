@@ -123,7 +123,6 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
     model1 = clone(model)
     model2 = clone(model)
     temp = []
-
     for i in K:
 
         if (M + i <= len(SNPs_indices_sorted) // 2):

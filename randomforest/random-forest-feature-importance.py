@@ -3,12 +3,21 @@
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
 from matplotlib import pyplot
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
 # define dataset
-X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_state=1)
+genotype_generated = pd.read_csv('../Xsubset.csv', header=None)
+phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded',header=None)
+genotype_generated = genotype_generated.to_numpy()
+phenotype_generated = phenotype_generated.to_numpy()
+phenotype_generated = phenotype_generated.reshape(len(phenotype_generated),)
+X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
+# X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_state=1)
 # define the model
 model = RandomForestClassifier()
 # fit the model
-model.fit(X, y)
+model.fit(genotype_generated, phenotype_generated)
 # get importance
 importance = model.feature_importances_
 # summarize feature importance
@@ -48,8 +57,7 @@ from sklearn.model_selection import train_test_split
 X, y = make_classification(
     n_samples=1000, n_features=10, n_informative=3, n_redundant=0,
     n_repeated=0, n_classes=2, random_state=0, shuffle=False)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2,random_state=10)
 
 # %%
 # A random forest classifier will be fitted to compute the feature importances.
@@ -98,6 +106,9 @@ from sklearn.inspection import permutation_importance
 
 result = permutation_importance(
     forest, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
+
+
+
 forest_importances = pd.Series(result.importances_mean, index=feature_names)
 
 # %%

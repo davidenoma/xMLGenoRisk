@@ -2,8 +2,8 @@
 
 import pandas as pd
 import  numpy as np
-X = pd.read_csv('Xsubset.csv')
-Y = pd.read_csv('hapmap_phenotype_recoded')
+X = pd.read_csv('../Xsubset.csv')
+Y = pd.read_csv('../hapmap_phenotype_recoded')
 
 # print(X.columns)
 #
