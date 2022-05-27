@@ -72,8 +72,8 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     model_XGboost = clone(model)
     eval_set = [(x_test, y_test)]
     # The model_XGboost model was changed to model variable
-    model_XGboost.fit(X_train, Y_train, verbose=False, early_stopping_rounds=(model_XGboost.n_estimators) / 10, eval_metric="auc",
-              eval_set=eval_set)
+    model_XGboost.fit(X_train, Y_train, verbose=False, early_stopping_rounds=model_XGboost.n_estimators / 10, eval_metric="auc",
+                      eval_set=eval_set)
     #model_XGboost = clone(model)
     print('XGboost done')
     # The function was changed from booster() to get_booster()
