@@ -10,7 +10,6 @@ optimal_indices_2 = array([  6,  14, 109, 160, 236, 285, 299, 300, 307, 318, 323
 header_file_subset = header_file.iloc[:,optimal_indices_2]
 
 for i in range(header_file_subset.shape[1]):
-       print(i)
        final_snps.append(str(header_file_subset.iloc[0,i]).split('_')[0])
 header_file_string = str(header_file_subset)
 # print(header_file_subset, header_file_string)

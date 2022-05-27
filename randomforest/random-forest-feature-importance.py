@@ -8,10 +8,16 @@ from sklearn.model_selection import train_test_split
 
 # define dataset
 genotype_generated = pd.read_csv('../Xsubset.csv', header=None)
-phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded',header=None)
-genotype_generated = genotype_generated.to_numpy()
+#Snps_list
+snpslist = pd.read_csv('../snps_list_shorter.txt', header=None)
+snpslist_reshape = snpslist.values.reshape(snpslist.shape[1])
+genotype_generated.columns = snpslist_reshape
+
+#PHENOTYPE FILE
+phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded', header=None)
 phenotype_generated = phenotype_generated.to_numpy()
 phenotype_generated = phenotype_generated.reshape(len(phenotype_generated),)
+
 X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
 # X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_state=1)
 # define the model
@@ -21,11 +27,13 @@ model.fit(genotype_generated, phenotype_generated)
 # get importance
 importance = model.feature_importances_
 # summarize feature importance
+print(importance)
 for i,v in enumerate(importance):
 	print('Feature: %0d, Score: %.5f' % (i,v))
 # plot feature importance
 pyplot.bar([x for x in range(len(importance))], importance)
-pyplot.show()
+
+# pyplot.show()
 
 
 """
@@ -53,18 +61,14 @@ import matplotlib.pyplot as plt
 # our dataset into training and testing subsets.
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-
-X, y = make_classification(
-    n_samples=1000, n_features=10, n_informative=3, n_redundant=0,
-    n_repeated=0, n_classes=2, random_state=0, shuffle=False)
 X_train, X_test, y_train, y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2,random_state=10)
-
 # %%
 # A random forest classifier will be fitted to compute the feature importances.
 from sklearn.ensemble import RandomForestClassifier
 
-feature_names = [f'feature {i}' for i in range(X.shape[1])]
-forest = RandomForestClassifier(random_state=0)
+feature_names = [f'feature {i}' for i in range(X_train.shape[1])]
+feature_names = X_train.columns
+forest = RandomForestClassifier(random_state=10)
 forest.fit(X_train, y_train)
 
 # %%
@@ -101,14 +105,10 @@ fig.tight_layout()
 # Permutation feature importance overcomes limitations of the impurity-based
 # feature importance: they do not have a bias toward high-cardinality features
 # and can be computed on a left-out test set.
+
 from sklearn.inspection import permutation_importance
-
-
 result = permutation_importance(
     forest, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
-
-
-
 forest_importances = pd.Series(result.importances_mean, index=feature_names)
 
 # %%
