@@ -5,7 +5,7 @@ from numpy import array
 #import scores from the different algorithms
 XGBOOST_TOP_SNPS = open("xgboost_fp/top_snps.list").read()
 RANDOM_FOREST_TOP_SNPS = open("randomforest/top_snps.list").read()
-NEURAL_NETWORK_TOP_SNPS = open("xgboost_fp/top_snps.list").read()
+DL_TOP_SNPS = open("xgboost_fp/top_snps.list").read()
 
 
 #find the set of overlap
