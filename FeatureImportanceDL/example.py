@@ -21,7 +21,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 data_batch_size = 32
 mask_batch_size = 32
 # final batch_size is data_batch_size x mask_batch_size
-s = 100  # size of optimal subset that we are looking for
+
+s = 100  # size of optimal subset that we are looking for or the size of the snps that we need
+#we coudl use percentages for this from the total number of features.
 s_p = 2  # number of flipped bits in a mask when looking around m_opt
 phase_2_start = 6000  # after how many batches phase 2 will begin
 max_batches = 15000  # how many batches if the early stopping condition not satisfied
