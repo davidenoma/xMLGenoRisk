@@ -1,22 +1,18 @@
+import numpy as np
 import pandas as pd
 from numpy import array
 
 
-#import scores from the different algorithms
-XGBOOST_TOP_SNPS = open("xgboost_fp/top_snps.list").read()
-RANDOM_FOREST_TOP_SNPS = open("randomforest/top_snps.list").read()
-DL_TOP_SNPS = open("xgboost_fp/top_snps.list").read()
-
-
-#find the set of overlap
-
-
-#locate this overlap to snps
+def compute_mean(fi_scores):
+    mean_score = np.mean(fi_scores)
+    return mean_score
 
 
 
-#use this snp set for risk prediction on the validation set
-
+def drop_and_sort(fi_scores,mean_score):
+    if fi_scores[i] < mean_score:
+        fi_scores.drop(labels=['i'])
+        fi_scores.sort(descending=True)
 
 
 
@@ -34,3 +30,50 @@ def prepare_header_snps(snps_file_name):
     for i in range(header_file_subset.shape[1]):
         final_snps.append(str(header_file_subset.iloc[0, i]).split('_')[0])
     header_file_string = str(header_file_subset)
+
+
+#import scores from the different algorithms
+XGBOOST_TOP_SNPS = pd.read_csv('xgboost_fp/top_snps.list')
+RANDOM_FOREST_TOP_SNPS = pd.read_csv('randomforest/top_snps.list')
+DL_TOP_SNPS = pd.read_csv('FeatureImportanceDL/top_snps.list')
+
+xgboost_fi_scores = pd.read_csv('xgboost_fp/top_snps.list')
+random_forest_fi_scores = pd.read_csv('randomforest/top_snps.list')
+dl_fi_scores = pd.read_csv('FeatureImportanceDL/top_snps.list')
+
+
+#compute the mean of feature importance vectors
+fv_one = compute_mean(xgboost_fi_scores)
+fv_two = compute_mean(random_forest_fi_scores)
+fv_three = compute_mean(dl_fi_scores)
+
+#Drop the features that are less that the mean of thesnps
+
+drop_and_sort(xgboost_fi_scores,fv_one)
+drop_and_sort(random_forest_fi_scores,fv_two)
+drop_and_sort(dl_fi_scores,fv_three)
+
+#Take top 1%
+
+#Take top 5%
+
+#Take top 10%
+
+
+
+#find the set of overlap
+
+
+
+
+
+
+#locate this overlap to snps
+
+
+
+#use this snp set for risk prediction on the validation set
+
+
+
+
