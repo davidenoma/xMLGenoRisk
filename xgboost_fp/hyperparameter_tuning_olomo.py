@@ -21,14 +21,13 @@ from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
 
 
-from google.colab import drive
-drive.mount('/content/drive')
-
-"""## First  using the evaluation metric "Accuracy""""
+# from google.colab import drive
+# drive.mount('/content/drive')
+"""## First  using the evaluation metric "Accuracy"""
 
 def objective(trial):
-  X = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/Xsubset.csv",header=None)
-  y = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/hapmap_phenotype_recoded.txt", sep = " ", header = None)
+  X = pd.read_csv("../Xsubset.csv",header=None)
+  y = pd.read_csv("../hapmap_phenotype_recoded", sep = " ", header = None)
   y.replace([1,2], [0,1], inplace = True)
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 234)
   dtrain = xgb.DMatrix(X_train, label = y_train)
@@ -46,8 +45,6 @@ def objective(trial):
       
   }
   n_estimators = [50, 100]
-  max_depth = [2, 4, 6, 8]
-  learning_rate = [0.001, 0.01, 0.1]
 
   if param["booster"] == "gbtree" or param["booster"] == "dart":
     param["max_depth"] = trial.suggest_int("max_depth", 1, 9)
@@ -90,10 +87,9 @@ print("Best HyperParamteters : %f", trial.params)
 
 ## For a problem as sensitive as Cancer, Evaluation metrics such as "Recall" or "F1 Score" are more important than "Accuracy" because the focus is on ensuring the highest number of people who have cancer are predicted to have cancer and so I will be using "Recall" as my evaluation metric here
 """
-
 def objective(trial):
-  X = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/Xsubset.csv",header=None)
-  y = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/hapmap_phenotype_recoded.txt", sep = " ", header = None)
+  X = pd.read_csv("../Xsubset.csv",header=None)
+  y = pd.read_csv("../hapmap_phenotype_recoded", sep = " ", header = None)
   y.replace([1,2], [0,1], inplace = True)
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 234)
   dtrain = xgb.DMatrix(X_train, label = y_train)

@@ -58,8 +58,8 @@ for i in range(NUM_TRIALS):
     temp_max_depth = [best0[i][1]['max_depth'], best1[i][1]['max_depth'], best2[i][1]['max_depth']]
     temp_lr = [best0[i][1]['learning_rate'], best1[i][1]['learning_rate'], best2[i][1]['learning_rate']]
     inx_best = np.argsort(temp_vec_log)[0]
-    model = model_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best])
 
+    model = model_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best])
     grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=5, cv=cv, verbose=1)
     grid_result = grid_search.fit(x, y)
     tot_grid_results.append(grid_result)
