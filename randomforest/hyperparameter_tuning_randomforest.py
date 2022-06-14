@@ -1,8 +1,12 @@
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
 import pandas as pd
 import numpy as np
+# !pip install --quiet optuna
+import optuna
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import recall_score
+from sklearn.model_selection import train_test_split
 
 X = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/Xsubset.csv", header=None)
 y = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/hapmap_phenotype_recoded.txt", sep=" ", header=None)
@@ -83,33 +87,6 @@ print("Best HyperParamteters : %f", trial.params)
 
 Looks like using recall lead to overfitting
 
-# XGBRegressor
-## Using parameters from Accuracy
-"""
-
-X = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/Xsubset.csv", header=None)
-y = pd.read_csv("/content/drive/My Drive/David_Enoma_PhD_Project/hapmap_phenotype_recoded.txt", sep=" ", header=None)
-y.replace([1, 2], [0, 1], inplace=True)
-d = xgb.DMatrix(X, label=y)
-
-params = {'booster': 'gblinear', "objective": "binary:logistic", 'max_depth': 5, 'lambda': 0.030475097247617086,
-          'alpha': 753658128510404e-05}
-
-cv_results = xgb.cv(dtrain=d, params=params, nfold=4, num_boost_round=50, early_stopping_rounds=10, metrics="auc",
-                    as_pandas=True, seed=234)
-cv_results
-
-"""## Using parameters from Recall"""
-
-params = {'booster': 'dart', 'lambda': 8.669790267915281e-07, 'alpha': 1.1536382592082632e-08,
-          'subsample': 0.28469669085250404, 'colsample_bytree': 0.5566590888822147,
-          'max_depth': 7, 'min_child_weight': 10, 'eta': 0.003933096882701822, 'gamma': 0.0018015367008443472,
-          'grow_policy': 'lossguide', 'sample_type': 'weighted',
-          'normalize_type': 'forest', 'rate_drop': 8.829825957910605e-06, 'skip_drop': 5.189332052983798e-07}
-
-cv_results = xgb.cv(dtrain=d, params=params, nfold=4, num_boost_round=50, early_stopping_rounds=10, metrics="auc",
-                    as_pandas=True, seed=234)
-cv_results
 
 """# RandomForestClassifier
 ## Using parameters from Accuracy
