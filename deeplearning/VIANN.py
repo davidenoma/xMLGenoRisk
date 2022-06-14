@@ -2,25 +2,18 @@ import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
-import tensorflow
+
 import keras
 import pandas as pd
 import numpy as np
 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from keras.utils import np_utils
-from keras import utils
-from keras.utils.np_utils import to_categorical
+
 from keras.layers.advanced_activations import PReLU
 from keras.layers.normalization import batch_normalization
 from keras.regularizers import l2
-from sklearn import datasets
-from sklearn import metrics
-from sklearn.preprocessing import LabelEncoder, scale
-from keras.utils import np_utils
+
 
 def NN1(input_dim, output_dim, isClassification = True):
     print("Starting NN1")
@@ -192,7 +185,7 @@ def LeaveOneFeatureOut(model, X, Y):
 #Testing variable importance
 #Settings obtained for each dataset
 VIANN = VarImpVIANN(verbose=1)
-input_dim = 1024
+input_dim = 1002
 
 model = Sequential()
 model.add(Dense(50, input_dim=input_dim, activation='relu', kernel_initializer='normal', kernel_regularizer=l2(0.01)))
@@ -201,9 +194,12 @@ model.add(Dense(100, activation='relu', kernel_initializer='normal', kernel_regu
 
 model.add(Dense(50, activation='relu', kernel_initializer='normal', kernel_regularizer=l2(0.01)))
 
-model.add(Dense(5, activation='softmax', kernel_initializer='normal'))
+model.add(Dense(1, activation='softmax', kernel_initializer='normal'))
 
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+
+X = pd.read_csv('../Xsubset.csv')
+Y = pd.read_csv('../hapmap_phenotype_recoded')
 
 model.fit(X, Y, validation_split=0.05, epochs=30, batch_size=64, shuffle=True,
           verbose=1, callbacks=[VIANN])

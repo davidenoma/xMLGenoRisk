@@ -13,10 +13,16 @@ np.random.seed(0)
 # loading data
 #  creating random genotyped data with the same size as the data used in the original manuscript
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
-X = pd.read_csv('../Xsubset.csv')
-Y = pd.read_csv('../hapmap_phenotype_recoded')
-print(X.shape)
-print(Y.shape)
+X = pd.read_csv('../../Xsubset.csv',header=None)
+Y = pd.read_csv('../../hapmap_phenotype_recoded',header=None)
+Y.replace([1,2], [0,1], inplace = True)
+#Conversion to numpy
+X = X.values.astype(np.int64)
+Y = Y.values.astype(np.int64)
+Y  = Y.ravel()
+
+print(X.shape,X.dtype)
+print(Y.shape,Y.dtype)
 
 f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
 best0 = pickle.load(f)
@@ -60,7 +66,8 @@ for i in range(NUM_TRIALS):
     inx_best = np.argsort(temp_vec_log)[0]
 
     model = model_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best])
-    grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=5, cv=cv, verbose=1)
+
+    grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=1, cv=cv, verbose=1)
     grid_result = grid_search.fit(x, y)
     tot_grid_results.append(grid_result)
     best_grid_results.append([grid_result.best_score_, grid_result.best_params_])

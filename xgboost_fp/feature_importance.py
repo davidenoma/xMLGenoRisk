@@ -1,9 +1,10 @@
+from sklearn import clone
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 import numpy as np
 import  pandas as pd
 from sklearn.preprocessing import LabelEncoder
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 #HYPER
 # [250, 300]
 n_estimators = 250
@@ -17,11 +18,11 @@ phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded',header=None)
 
 
 #Conversion to numpy
-genotype_generated = genotype_generated.to_numpy()
-phenotype_generated = phenotype_generated.to_numpy()
+genotype_generated = genotype_generated.values.astype(np.int64)
+phenotype_generated = phenotype_generated.values.astype(np.int64)
 phenotype_generated = phenotype_generated.ravel()
 #Conversion of phenotype
-phenotype_generated = LabelEncoder().fit_transform(phenotype_generated)
+# phenotype_generated = LabelEncoder().fit_transform(phenotype_generated)
 # Create a train/test split
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
@@ -32,18 +33,19 @@ eval_set = [(X_test, y_test)]
 # eval_set=eval_set
 # early_stopping_rounds=model.n_estimators / 10
 print(X_train.shape)
+model = clone(model)
+
 model.fit(X_train, y_train, eval_set=eval_set, early_stopping_rounds=model.n_estimators,verbose = True)
-print(model.feature_importances_.shape)
-plt.barh([i for i in range(0,X_train.shape[1])], model.feature_importances_)
-plt.show()
+
+
+scores_key_values = model.get_booster().get_score(importance_type='gain')
+print(scores_key_values)
+# plt.barh([i for i in range(0,X_train.shape[1])], model.feature_importances_)
+# plt.show()
 sorted_idx = model.feature_importances_.argsort()
 # plt.barh([i for i in range(0,X_train.shape[1])][sorted_idx], model.feature_importances_[sorted_idx])
-plt.xlabel("Xgboost Feature Importance")
-
-# now sort based on
-scores_key_values = model.get_booster().get_score(importance_type='gain')
-
-print(scores_key_values)
+# plt.xlabel("Xgboost Feature Importance")
+# print("Score key values",model2.get_booster().get_score(importance_type='gain'))
 index_non_zero = list()
 for i in range(len(scores_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
     # converting scores_key_values.keys() to list(scores_key_values) and appending the indices of the features to index_non_zero without

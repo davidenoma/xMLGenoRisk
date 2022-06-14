@@ -2,7 +2,6 @@
 # the adaptive iterative search,
 # of our proposed approach on randomly-generated data
 
-
 # output: best_indices_cvt_auc_recall3, the best indices found from validation data
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
@@ -16,20 +15,29 @@ from sklearn.metrics import precision_recall_curve
 from sklearn import svm
 
 # fixing seed: important to have same random train and test split as the optimizing
-#np.random.seed(0)
+np.random.seed(0)
 
 # loading data
 #  creating random genotyped data with the same size as the data used in the original manuscript
 
 
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
-X = pd.read_csv('hapmap_genotype_nohead',sep=" ")
-Y = pd.read_csv('hapmap_phenotype_nohead',sep=" ")
-X = X.dropna(axis='columns')
-X.columns = np.arange(X.shape[1])
-X=np.int64(X)
-Y= np.int64(Y)
-Y=Y.ravel()
+X = pd.read_csv('../Xsubset.csv',header=None)
+Y = pd.read_csv('../hapmap_phenotype_recoded',header=None)
+Y.replace([1,2], [0,1], inplace = True)
+# X = X.dropna(axis='columns')
+# X.columns = np.arange(X.shape[1])
+# X=np.int64(X)
+# Y= np.int64(Y)
+# Y=Y.ravel()
+
+#Conversion to numpy
+X = X.values.astype(np.int64)
+Y = Y.values.astype(np.int64)
+Y  = Y.ravel()
+
+# X = np.random.randint(3, size=(109L, 1002L))
+# Y = np.random.randint(2, size=(109L, ))
 
 #print('before dropping: ',X.shape,X.columns)
 
@@ -49,19 +57,19 @@ Y=Y.ravel()
 
 # XGBoost achieved optimal hyperparameters [log_loss, {learning_rate, max_depth, n_estimators}]
 # for 10 iterative process.
-f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
+f = open('older_optimization/best_grid_results_stage1_kuopio_0.pckl', 'rb')
 best0 = pickle.load(f)
 f.close()
 
-f = open('best_grid_results_stage1_kuopio_1.pckl', 'rb')
+f = open('older_optimization/best_grid_results_stage1_kuopio_1.pckl', 'rb')
 best1 = pickle.load(f)
 f.close()
 
-f = open('best_grid_results_stage1_kuopio_2.pckl', 'rb')
+f = open('older_optimization/best_grid_results_stage1_kuopio_2.pckl', 'rb')
 best2 = pickle.load(f)
 f.close()
 
-f = open('best_grid_results_stage1_kuopio_7.pckl', 'rb')
+f = open('older_optimization/best_grid_results_stage1_kuopio_7.pckl', 'rb')
 best7 = pickle.load(f)
 f.close()
 
@@ -71,11 +79,9 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     #fitting an XGBoost model and returning feature importance (gain)
     model_XGboost = clone(model)
     eval_set = [(x_test, y_test)]
-    # The model_XGboost model was changed to model variable
-    model_XGboost.fit(X_train, Y_train, verbose=False, early_stopping_rounds=model_XGboost.n_estimators / 10, eval_metric="auc",
+
+    model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
-    #model_XGboost = clone(model)
-    print('XGboost done')
     # The function was changed from booster() to get_booster()
     print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
     return model_XGboost.get_booster().get_score(importance_type='gain')
@@ -85,33 +91,25 @@ def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices, m
     #    classifier = clone(model)
     #    print(model)
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
-    classifier.fit(XX_train[:, indices], YY_train)
-    ts_score = classifier.predict_proba(XX_validation[:, indices])
-    precision, recall, _ = precision_recall_curve(YY_validation, ts_score[:, 1], pos_label=1)
-
-    return ts_score[:, 1]
+    classifier.fit(XX_train[:,indices], YY_train)
+    ts_score = classifier.predict_proba(XX_validation[:,indices])
+    precision, recall, _ = precision_recall_curve(YY_validation, ts_score[:,1])
+    return ts_score[:,1]
 
 
 def cal_XGboost_feature_importance(X_train, Y_train, indices, model, X_test, Y_test):
     # # initial sort: algorithm 1 step 1
     model_1 = clone(model)
-    eval_set = [(X_test[:, indices], Y_test)]
-    model_1.fit(X_train[:, indices], Y_train, verbose=False, early_stopping_rounds=(model_1.n_estimators) / 10,
-                eval_metric="auc", eval_set=eval_set)
+    eval_set = [(X_test[:,indices], Y_test)]
+    model_1.fit(X_train[:,indices], Y_train,  verbose = False, early_stopping_rounds=model_1.n_estimators ,  eval_metric="auc", eval_set=eval_set)
     # now sort based on gain
     scores_key_values = model_1.get_booster().get_score(importance_type='gain')
     index_non_zero = list()
-    for i in range(len(scores_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
-        # converting scores_key_values.keys() to list(scores_key_values) and appending the indices of the features to index_non_zero without
-        # the f character=
-        index_non_zero.append(np.int64(list(scores_key_values)[i][1:]))  # indices of keys
-    sorted_values = np.argsort(scores_key_values.values())[
-                    ::-1]  # argsorting based on gain and getting corresponding top indices.
-    print('PRINTING SORTED VALUES', sorted_values, 'END.', '\n')
-    print('INDEX NON ZERO', index_non_zero)
-
-    from_top_temp = indices[np.array(index_non_zero)[sorted_values]]  # in range [0,125041]
-    zir_from_top = np.array(list(set(indices) ^ set(indices[np.array(index_non_zero)[sorted_values]])))
+    for i in range(len(scores_key_values.keys())): # getting indices of used features in xgboost in [0, len(indices)]
+        index_non_zero.append(np.int64(scores_key_values.keys()[i][1:]))# indices of keys
+    sorted_values = np.argsort(scores_key_values.values())[::-1] # argsorting based on gain and getting corresponding top indices.
+    from_top_temp = indices[np.array(index_non_zero)[sorted_values]]   # in range [0,125041]
+    zir_from_top = np.array(list(set(indices)^set(indices[np.array(index_non_zero)[sorted_values]])))
     from_top = np.concatenate((from_top_temp, zir_from_top), axis=0)
     return from_top
 
@@ -123,35 +121,39 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
     model1 = clone(model)
     model2 = clone(model)
     temp = []
+
     for i in K:
 
         if (M + i <= len(SNPs_indices_sorted) // 2):
             eval_set1 = [(X_test[:, SNPs_indices_sorted[:M + i]], Y_test)]
-            model1.fit(XX_train[:, SNPs_indices_sorted[:M + i]], YY_train, verbose=False,
-                       early_stopping_rounds=(model1.n_estimators) / 10, eval_metric="auc",
+
+            model1.fit(XX_train[:, SNPs_indices_sorted[:M + i]], YY_train, verbose=True,early_stopping_rounds=model1.n_estimators ,
+                        eval_metric="auc",
                        eval_set=eval_set1)  # from top
 
             eval_set2 = [(X_test[:, SNPs_indices_sorted[-M - i:]], Y_test)]
-            model2.fit(XX_train[:, SNPs_indices_sorted[-M - i:]], YY_train, verbose=False,
-                       early_stopping_rounds=(model2.n_estimators) / 10, eval_metric="auc",
+            model2.fit(XX_train[:, SNPs_indices_sorted[-M - i:]], YY_train, verbose=True,  early_stopping_rounds=model2.n_estimators ,
+                        eval_metric="auc",
                        eval_set=eval_set2)  # from bottom
 
             scores4_key_values = model1.get_booster().get_score(importance_type='gain')
             index_non_zero4 = list()
             for uu in range(
                     len(scores4_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
-                # converting scores4_key_values.keys() to list(scores4_key_values)
-                index_non_zero4.append(np.int64(list(scores4_key_values)[uu][1:]))  # indices of keys
-            sorted_values4 = np.argsort(scores4_key_values.values())[::-1]  # argsorting based on gain and getting corresponding top indices.
+                index_non_zero4.append(np.int64(scores4_key_values.keys()[uu][1:]))  # indices of keys
+            sorted_values4 = np.argsort(scores4_key_values.values())[
+                             ::-1]  # argsorting based on gain and getting corresponding top indices.
             M_top = []
             M_top_temp = SNPs_indices_sorted[:M + i][np.array(index_non_zero4)[sorted_values4]]
-            zir_top = np.array(list(set(SNPs_indices_sorted[:M + i]) ^ set(SNPs_indices_sorted[:M + i][np.array(index_non_zero4)[sorted_values4]])))
+            zir_top = np.array(list(set(SNPs_indices_sorted[:M + i]) ^ set(
+                SNPs_indices_sorted[:M + i][np.array(index_non_zero4)[sorted_values4]])))
             M_top = np.concatenate((M_top_temp, zir_top), axis=0)
+
             scores5_key_values = model2.get_booster().get_score(importance_type='gain')
             index_non_zero5 = list()
-            for uu in range(len(scores5_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
-                # converting scores5_key_values.keys() to list(scores5_key_values)
-                index_non_zero5.append(np.int64(list(scores5_key_values)[uu][1:]))  # indices of keys
+            for uu in range(
+                    len(scores5_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
+                index_non_zero5.append(np.int64(scores5_key_values.keys()[uu][1:]))  # indices of keys
             sorted_values5 = np.argsort(scores5_key_values.values())[
                              ::-1]  # argsorting based on gain and getting corresponding top indices.
             M_bottom_temp = SNPs_indices_sorted[-M - i:][np.array(index_non_zero5)[sorted_values5]]
@@ -171,18 +173,12 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
 
     return temp
 
-
 def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # From test NOT CV
-
     model_Tune_stage2 = clone(model)
     average_index_non_zero = list()
-    print('printing score keys',len(xgboost_scores),xgboost_scores.keys())
-
-    for i in range(len(xgboost_scores.keys())):
-        # getting indices of selected features from training set. Indices are in [0,125041]
-        # converting xgboost_scores.keys() to list(xgboost_scores) to get the indexes of each of
-        # print("printing xgboost score",np.int64(list(xgboost_scores)[i]))
-        average_index_non_zero.append(np.int64(list(xgboost_scores)[i][1:]))
+    for i in range(
+            len(xgboost_scores.keys())):  # getting indices of selected features from training set. Indices are in [0,125041]
+        average_index_non_zero.append(np.int64(xgboost_scores.keys()[i][1:]))
 
     MM = [2, 4, 6, 8, 10, 20, 30]  # window size (Algorithm 1 step 2)
     K_increament = [1, 2, 3, 4, 5]  # adaptively increase window size (Algorithm 1 step 5)
@@ -190,12 +186,9 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
     global_returned_sorted = list()
     tot_roc = list()
     # let's fix m, n and k
-
     SNPs_indices_sorted_main = cal_XGboost_feature_importance(X_train, Y_train, np.array(average_index_non_zero),
-                                                              model_Tune_stage2, X_test, Y_test)
-    # initial sorting
-
-    SNPs_indices_sort4ed_main = np.int64(SNPs_indices_sorted_main)
+                                                              model_Tune_stage2, X_test, Y_test)  # initial sorting
+    SNPs_indices_sorted_main = np.int64(SNPs_indices_sorted_main)
     for M in MM:
         for KK in K_increament:
             for N in NN:
@@ -211,15 +204,14 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
                     for ii in selected:
                         if (ii != 0):
                             #                            print(ii)
-                            # This works on the SVM model for the classification
                             ts_score1 = all_results_SVM(X_train, Y_train, X_test, Y_test, returned_sorted4[:ii],
                                                         model_Tune_stage2)
                             # specific M, K, N, ii and CV
                             print('M: ' + str(M) + ' K: ' + str(KK) + ' N: ' + str(N) + ' ii: ' + str(ii))
                             global_returned_sorted.append(returned_sorted4[:ii])
-                            precision2, recall2, _ = precision_recall_curve(Y_test, ts_score1,pos_label=1)
+                            precision2, recall2, _ = precision_recall_curve(Y_test, ts_score1)
                             tot_roc.append(auc(recall2, precision2))
-    #                            print(auc(recall2, precision2))
+                            print(auc(recall2, precision2))
 
     best_indices_auc_recall = global_returned_sorted[np.argsort(tot_roc)[::-1][0]]
     return best_indices_auc_recall
@@ -237,8 +229,6 @@ best_indices_cvt_auc_recall = list()
 for i in range(NUM_TRIALS):
     print(i)
     x, x_cv, y, y_cv = train_test_split(X, Y, test_size=0.2, train_size=0.8, stratify=Y, random_state=i)
-
-
     # optimizing xgboost parameters: never seen on x_cv and y_cv
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
     # Comparison
@@ -259,20 +249,13 @@ for i in range(NUM_TRIALS):
     best_indices_cv_auc_recall = list()
     # Important: same train and test split as xgboost optimization codes  by fixing random seed
     for train, test in cv.split(x, y):
-        print('printing train')
-        print(train)
-        print('printing test')
-        print(test)
-        print('Trying iloc')
-        #using iloc instead of standard indexing
         X_train = x[train]
         Y_train = y[train]
         X_test = x[test]
         Y_test = y[test]
-        print('X_train', X_train)
+
         xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
-        # if len(xgboost_scores1) == 0:
-        #     continue
+        print("xgboost_scores1",xgboost_scores1)
         best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
         best_indices_cv_auc_recall.append(best_indices_au_recall)
 

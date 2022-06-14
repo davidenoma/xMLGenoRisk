@@ -12,10 +12,12 @@ np.random.seed(0)
 # loading data
 # Creating random genotyped data with the same size as the data used in the original manuscript
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
-X = pd.read_csv('../Xsubset.csv')
-Y = pd.read_csv('../hapmap_phenotype_recoded')
-X = X.dropna(axis='columns')
-X.columns = np.arange(X.shape[1])
+X = pd.read_csv('../Xsubset.csv',header=None)
+Y = pd.read_csv('../hapmap_phenotype_recoded',header=None)
+
+Y.replace([1,2], [0,1], inplace = True)
+# X = X.dropna(axis='columns')
+# X.columns = np.arange(X.shape[1])
 X  = np.int64(X)
 Y= np.int64(Y)
 Y=Y.ravel()
@@ -33,8 +35,6 @@ for j in range(len(best_indices)):
         indices_new.append(list(best_indices[j][k]))
 
 indices_new1 = np.unique(np.concatenate(indices_new))
-print(len(indices_new1))
-
 
 def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')

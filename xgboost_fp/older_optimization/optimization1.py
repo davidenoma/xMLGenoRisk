@@ -17,11 +17,18 @@ np.random.seed(0)
 #696, 125041
 #X = np.random.randint(3, size=(200, 1000))
 #Y = np.random.randint(2, size=(200, ))
-X = pd.read_csv('../Xsubset.csv')
-Y = pd.read_csv('../hapmap_phenotype_recoded')
-print(X.shape)
-print(Y.shape)
+X = pd.read_csv('../../Xsubset.csv',header=None)
+Y = pd.read_csv('../../hapmap_phenotype_recoded',header=None)
+Y.replace([1,2], [0,1], inplace = True)
 
+#Conversion to numpy
+
+X = X.values.astype(np.int64)
+Y = Y.values.astype(np.int64)
+Y  = Y.ravel()
+
+print(X.shape,X.dtype)
+print(Y.shape,Y.dtype)
 # Tuning
 NUM_TRIALS = 10
 n_estimators = [150, 200]
@@ -39,8 +46,8 @@ for i in range(NUM_TRIALS):
                                         random_state=i)
     # optimizing xgboost parameters: never seen on x_cv and y_cv
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-    grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=5, cv=cv, verbose=1)
-    grid_result = grid_search.fit(x, y.values.ravel())
+    grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=1, cv=cv, verbose=1)
+    grid_result = grid_search.fit(x, y)
     tot_grid_results.append(grid_result)
     best_grid_results.append([grid_result.best_score_, grid_result.best_params_])
 

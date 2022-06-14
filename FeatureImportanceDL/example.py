@@ -4,18 +4,9 @@ from sklearn.model_selection import train_test_split
 import tensorflow.python.keras as keras
 from tensorflow.python.keras import backend as K
 from src.FeatureSelector import FeatureSelector
-from DataGenerator import generate_data, get_one_hot
 import pandas as pd
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
-# Dataset parameters
-# N_TRAIN_SAMPLES = 512
-# N_VAL_SAMPLES = 256
-# N_TEST_SAMPLES = 1024
-# N_FEATURES = 1002
-# FEATURE_SHAPE = (10,)
-# dataset_label = "GNP_"
 
 # Training parapmeters
 data_batch_size = 32
@@ -25,12 +16,12 @@ mask_batch_size = 32
 s = 100  # size of optimal subset that we are looking for or the size of the snps that we need
 #we coudl use percentages for this from the total number of features.
 s_p = 2  # number of flipped bits in a mask when looking around m_opt
+
 phase_2_start = 6000  # after how many batches phase 2 will begin
+
 max_batches = 15000  # how many batches if the early stopping condition not satisfied
 early_stopping_patience = 600  # how many patience batches (after phase 2 starts)
 # before the training stops
-
-# Generate data for XOR dataset:
 
 
 # In total 10 features
