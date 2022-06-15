@@ -5,6 +5,7 @@ import pickle
 from sklearn import svm
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import average_precision_score
+# from matplotlib import pyplot
 
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
@@ -40,6 +41,7 @@ def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
     classifier.fit(XX_train[:, indices], YY_train)
     ts_score = classifier.predict_proba(XX_validation[:, indices])
+    print(ts_score)
     return ts_score[:, 1]
 
 
