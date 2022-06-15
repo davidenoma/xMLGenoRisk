@@ -27,11 +27,14 @@ from sklearn.model_selection import train_test_split
 
 def objective(trial):
   X = pd.read_csv("../Xsubset.csv",header=None)
-  y = pd.read_csv("../hapmap_phenotype_recoded", sep = " ", header = None)
+  y = pd.read_csv("../hapmap_phenotype_recoded", header = None)
   y.replace([1,2], [0,1], inplace = True)
+
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 234)
   dtrain = xgb.DMatrix(X_train, label = y_train)
   dtest = xgb.DMatrix(X_test, label = y_test)
+
+
   param = {
       "silent": 1,
       "objective": "binary:logistic",
