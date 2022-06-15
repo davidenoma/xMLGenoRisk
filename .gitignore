@@ -12,6 +12,6 @@
 /xgboost_fp/best_indices_cvt_auc_recall3.pckl
 
 
-/FeatureImportanceDL/logs/*
+**/logs/*
 
 /.idea/*

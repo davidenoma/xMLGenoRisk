@@ -4,7 +4,15 @@ from os import write
 import pandas as pd
 from numpy import array
 
-def prepare_header_snps(indices):
+#Remove the underscore from the snps
+def rename_header_snps(snps_list):
+       final_snps = []
+       for i in range(0,len(snps_list)):
+              final_snps.append(snps_list[i].split('_')[0])
+
+       return  final_snps
+
+def prepare_snps(indices):
        final_snps = []
        header_file_subset = header_file.iloc[:, indices]
        for i in range(header_file_subset.shape[1]):
@@ -18,13 +26,14 @@ def main(genotype_file,phenotype_file):
        # phenotype_file = sys.argv[1]
        header_file = pd.read_csv(genotype_file)
        snps_list = list(header_file.columns.values)
-       snps_list = prepare_header_snps(snps_list)
-       with open('snps_list','w') as f:
-              f.writelines(snps_list)
-       f.close()
-
-
-
+       snps_list = rename_header_snps(snps_list)
+       snps_list = pd.DataFrame(snps_list)
+       #Writing to file
+       snps_list.to_csv('snps_list_on_file')
+       # with open('snps_list','w') as f:
+       #        f.writelines(snps_list)
+       #        f.writelines(",")
+       # f.close()
        genotype_file_full = pd.read_csv(genotype_file, header=None)
        phenotype_file = pd.read_csv(phenotype_file, header=None)
        print(phenotype_file)
