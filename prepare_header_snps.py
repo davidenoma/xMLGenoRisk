@@ -4,9 +4,6 @@ from os import write
 import pandas as pd
 from numpy import array
 
-#Remove the underscore from the snps
-from pandas.tools.plotting import table
-
 
 def rename_header_snps(snps_list):
        final_snps = []
