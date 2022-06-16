@@ -12,11 +12,12 @@ Original file is located at
 import optuna
 import optuna.integration
 import optuna.visualization
+import plotly
 
 import xgboost as xgb
 import pandas as pd
 import numpy as np
-from xgboost import XGBClassifier
+from matplotlib import pyplot as plt
 
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import recall_score
@@ -26,6 +27,8 @@ from sklearn.model_selection import train_test_split
 # drive.mount('/content/drive')
 
 # Loading the dataset
+from xgboost import XGBClassifier
+
 X = pd.read_csv("../Xsubset.csv", header=None)
 y = pd.read_csv("../hapmap_phenotype_recoded", header=None)
 y.replace([1, 2], [0, 1], inplace=True)
@@ -140,10 +143,57 @@ def objective_recall(trial):
 study = optuna.create_study(direction="maximize")
 study.optimize(objective_accuracy, n_trials=100, timeout=600, show_progress_bar=False)
 trial_acc = study.best_trial
-optuna.visualization.plot_param_importances(study)
-optuna.visualization.plot_optimization_history(study)
+plot_param_imp = optuna.visualization.plot_param_importances(study)
+# plot_param_imp.show()
+plot_opt_history = optuna.visualization.plot_optimization_history(study)
+# plot_opt_history.show()
 print("Accuracy : %f", trial_acc.value)
 print("Best HyperParamteters : %f", trial_acc.params)
+
+"""
+# XGBClassifier
+## Using parameters from Accuracy
+"""
+d = xgb.DMatrix(X, label=y)
+# trial.params
+cv_results = xgb.cv(dtrain=d, params=trial_acc.params, nfold=5, num_boost_round=50, early_stopping_rounds=10,
+                    metrics="auc",
+                    as_pandas=True, seed=234)
+print("CV RESULT", cv_results)
+
+
+#The model feature importances without optimiziton
+# imp_model = xgb.train(X, label=y)
+# print(imp_model.feature_importances_)
+imp_model = XGBClassifier(use_label_encoder=False)
+imp_model.fit(X, y.values.ravel())
+fi_scores = imp_model.feature_importances_
+print(fi_scores)
+scores_key_values = imp_model.get_booster().get_score(importance_type='gain')
+print(scores_key_values)
+plt.barh(list(scores_key_values.keys()), list(scores_key_values.values()))
+plt.xlabel("Xgboost Feature Importance not optimized")
+plt.show()
+
+#The model feature importances with optimiztion
+imp_model_opt = XGBClassifier(**trial_acc.params,use_label_encoder=False)
+imp_model_opt.fit(X, y.values.ravel())
+fi_scores_opt = imp_model_opt.feature_importances_
+print(fi_scores_opt)
+scores_opt_key_values = imp_model_opt.get_booster().get_score(importance_type='gain')
+print(scores_opt_key_values)
+plt.barh(list(scores_opt_key_values.keys()), list(scores_opt_key_values.values()))
+plt.xlabel("Xgboost Feature Importance Optimized")
+plt.show()
+#sorting the features
+sorted_idx = imp_model_opt.feature_importances_.argsort()
+plt.barh(list(scores_opt_key_values.keys())[sorted_idx], list(scores_opt_key_values.values())[sorted_idx])
+
+
+
+
+
+
 
 # optimizing for recall
 study = optuna.create_study(direction="maximize")
@@ -153,18 +203,10 @@ trial = study.best_trial
 print("Recall : %f", trial.value)
 print("Best HyperParamteters : %f", trial.params)
 
-"""
-# XGBClassifier
-## Using parameters from Accuracy
-"""
-d = xgb.DMatrix(X, label=y)
-# trial.params
 
-cv_results = xgb.cv(dtrain=d, params=trial_acc.params, nfold=5, num_boost_round=50, early_stopping_rounds=10,
-                    metrics="auc",
-                    as_pandas=True, seed=234)
 
-print("CV RESULT", cv_results)
+
+
 
 """## Using parameters from Recall"""
 
