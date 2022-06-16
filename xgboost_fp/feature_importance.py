@@ -23,7 +23,18 @@ phenotype_generated = phenotype_generated.values.astype(np.int64)
 phenotype_generated = phenotype_generated.ravel()
 #Conversion of phenotype
 # phenotype_generated = LabelEncoder().fit_transform(phenotype_generated)
-# Create a train/test split
+
+
+
+# Create a train/test/validation split
+#the below two lines of code generate a 60, 20, 20 split
+X_train, X_test, y_train, y_test = train_test_split(genotype_generated, phenotype_generated, test_size=0.2, random_state=1)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=1)
+#the below two lines of code to generate a 80 10 10 split.
+X_train, X_rem, y_train, y_rem = train_test_split(X,y, train_size=0.8)
+X_valid, X_test, y_valid, y_test = train_test_split(X_rem,y_rem, test_size=0.5)
+
+
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
 
@@ -36,8 +47,6 @@ print(X_train.shape)
 model = clone(model)
 
 model.fit(X_train, y_train, eval_set=eval_set, early_stopping_rounds=model.n_estimators,verbose = True)
-
-
 scores_key_values = model.get_booster().get_score(importance_type='gain')
 print(scores_key_values)
 # plt.barh([i for i in range(0,X_train.shape[1])], model.feature_importances_)
