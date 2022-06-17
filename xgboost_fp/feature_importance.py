@@ -48,10 +48,16 @@ model = clone(model)
 
 model.fit(X_train, y_train, eval_set=eval_set, early_stopping_rounds=model.n_estimators,verbose = True)
 scores_key_values = model.get_booster().get_score(importance_type='gain')
-print(list(scores_key_values.values()),"\n", list(scores_key_values.keys()))
+# print(list(scores_key_values.values()),"\n", list(scores_key_values.keys()))
 # plt.barh([i for i in range(0,X_train.shape[1])], model.feature_importances_)
 # plt.show()
-sorted_idx = model.feature_importances_.argsort()
+print(scores_key_values,len(scores_key_values))
+#pRINT
+fis = model.feature_importances_
+print(fis,len(fis))
+sorted_idx = fis.argsort()
+print(fis[sorted_idx])
+# print(sorted_idx)
 # plt.barh([i for i in range(0,X_train.shape[1])][sorted_idx], model.feature_importances_[sorted_idx])
 # plt.xlabel("Xgboost Feature Importance")
 # print("Score key values",model2.get_booster().get_score(importance_type='gain'))

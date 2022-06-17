@@ -247,6 +247,7 @@ for i in range(NUM_TRIALS):
     model = build_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
 #   print(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
     best_indices_cv_auc_recall = list()
+
     # Important: same train and test split as xgboost optimization codes  by fixing random seed
     for train, test in cv.split(x, y):
         X_train = x[train]

@@ -8,6 +8,7 @@ Original file is located at
 """
 
 # !pip install --quiet optuna
+from array import array
 
 import optuna
 import optuna.integration
@@ -57,27 +58,13 @@ def objective_accuracy(trial):
         "subsample": trial.suggest_loguniform("subsample", 0.4, 0.8),
         # others are seed, random_state, n_jpbs
     }
-    # if param["booster"] == "gbtree" or param["booster"] == "dart":
-    #   param["max_depth"] = trial.suggest_int("max_depth", 1, 9)
-    #   param["eta"]= trial.suggest_loguniform("eta", 1e-8, 1.0)
-    #   param["gamma"]= trial.suggest_loguniform("gamma", 1e-8, 1.0)
-    #   param["grow_policy"] = trial.suggest_categorical("grow_policy", ["depthwise", "lossguide"])
-    # if param["booster"] == "dart":
-    #   param["sample_type"]=trial.suggest_categorical("sample_type", ["uniform", "weighted"])
-    #   param["normalize_type"]=trial.suggest_categorical("normalize_type", ["tree", "forest"])
-    #   param["rate_drop"] = trial.suggest_loguniform("rate_drop", 1e-8, 1.0)
-    #   param["skip_drop"] = trial.suggest_loguniform("skip_drop", 1e-8, 1.0)
     # Call Back for Pruning
     pruning_callback = optuna.integration.XGBoostPruningCallback(trial, "validation-auc")
-    # model = XGBClassifier(**params)
-    # # model.fit(X_train, y_train, eval_set=[(X_test, y_train)], early_stopping_rounds=100, verbose=False)
-    # # model.
     bst = xgb.train(params, dtrain, evals=[(dtest, "validation")], callbacks=[pruning_callback], verbose_eval=False)
     preds = bst.predict(dtest)
     pred_labels = np.rint(preds)
     accuracy = accuracy_score(y_test, pred_labels)
     return accuracy
-
 
 # the second objective is recall
 def objective_recall(trial):
@@ -138,7 +125,6 @@ def objective_recall(trial):
     Recall = recall_score(y_test, pred_labels)
     return Recall
 
-
 # optimizing for accuracy
 study = optuna.create_study(direction="maximize")
 study.optimize(objective_accuracy, n_trials=100, timeout=600, show_progress_bar=False)
@@ -161,7 +147,6 @@ cv_results = xgb.cv(dtrain=d, params=trial_acc.params, nfold=5, num_boost_round=
                     as_pandas=True, seed=234)
 print("CV RESULT", cv_results)
 
-
 #The model feature importances without optimiziton
 # imp_model = xgb.train(X, label=y)
 # print(imp_model.feature_importances_)
@@ -174,7 +159,6 @@ print(scores_key_values)
 plt.barh(list(scores_key_values.keys()), list(scores_key_values.values()))
 plt.xlabel("Xgboost Feature Importance not optimized")
 plt.show()
-
 #The model feature importances with optimiztion
 imp_model_opt = XGBClassifier(**trial_acc.params,use_label_encoder=False)
 imp_model_opt.fit(X, y.values.ravel())
@@ -182,12 +166,13 @@ fi_scores_opt = imp_model_opt.feature_importances_
 print(fi_scores_opt)
 scores_opt_key_values = imp_model_opt.get_booster().get_score(importance_type='gain')
 print(scores_opt_key_values)
+print(imp_model_opt.feature_importances_)
 plt.barh(list(scores_opt_key_values.keys()), list(scores_opt_key_values.values()))
 plt.xlabel("Xgboost Feature Importance Optimized")
 plt.show()
 #sorting the features
 sorted_idx = imp_model_opt.feature_importances_.argsort()
-plt.barh(list(scores_opt_key_values.keys())[sorted_idx], list(scores_opt_key_values.values())[sorted_idx])
+plt.barh(list(scores_opt_key_values.keys())[array(sorted_idx)], list(scores_opt_key_values.values())[array(sorted_idx)])
 
 
 
@@ -199,7 +184,6 @@ plt.barh(list(scores_opt_key_values.keys())[sorted_idx], list(scores_opt_key_val
 study = optuna.create_study(direction="maximize")
 study.optimize(objective_recall, n_trials=100, timeout=600, show_progress_bar=False)
 trial = study.best_trial
-
 print("Recall : %f", trial.value)
 print("Best HyperParamteters : %f", trial.params)
 
@@ -210,12 +194,7 @@ print("Best HyperParamteters : %f", trial.params)
 
 """## Using parameters from Recall"""
 
-params = {'booster': 'dart', 'lambda': 8.669790267915281e-07, 'alpha': 1.1536382592082632e-08,
-          'subsample': 0.28469669085250404, 'colsample_bytree': 0.5566590888822147,
-          'max_depth': 7, 'min_child_weight': 10, 'eta': 0.003933096882701822, 'gamma': 0.0018015367008443472,
-          'grow_policy': 'lossguide', 'sample_type': 'weighted',
-          'normalize_type': 'forest', 'rate_drop': 8.829825957910605e-06, 'skip_drop': 5.189332052983798e-07}
 
-cv_results = xgb.cv(dtrain=d, params=params, nfold=4, num_boost_round=50, early_stopping_rounds=10, metrics="auc",
+cv_results = xgb.cv(dtrain=d, params=trial.params, nfold=4, num_boost_round=50, early_stopping_rounds=10, metrics="auc",
                     as_pandas=True, seed=234)
 cv_results
