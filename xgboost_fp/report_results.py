@@ -4,7 +4,9 @@ import  pandas as pd
 import pickle
 from sklearn import svm
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.metrics import roc_curve
+
 from matplotlib import pyplot
 
 # fixing seed: important to have same random train and test split as the optimizing
@@ -76,7 +78,13 @@ for i in range(NUM_TRIALS):
             tot_average_precisionDev.append(average_precision_score(Y_test, ts_scoreL1))
             # test
             ts_scoreL1 = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
+
             tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
+            svm_auc = roc_auc_score(y_cv, ts_scoreL1)
+            print('SVM: AUC=%.3f' % (svm_auc))
+            svm_fpr, svm_tpr, _ = roc_curve(y_cv, ts_scoreL1)
+            pyplot.plot(svm_fpr, svm_tpr,marker='.')
+            pyplot.show()
 
 print(str('Train Average precision: ') + str(np.mean(tot_average_precisionTR) * 100) + str('std: ') + str(
     np.std(tot_average_precisionTR)))
