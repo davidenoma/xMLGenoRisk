@@ -10,7 +10,7 @@
 /xgboost_fp/older_optimization/tot_grid_results_stage1_kuopio_2.pckl
 /xgboost_fp/older_optimization/tot_grid_results_stage1_kuopio_7.pckl
 /xgboost_fp/best_indices_cvt_auc_recall3.pckl
-**/logs/*
-/.idea/*
-/data
-/FeatureImportanceDL/logs/*
+**/logs/**
+/.idea/**
+/data/**
+/FeatureImportanceDL/logs/**
