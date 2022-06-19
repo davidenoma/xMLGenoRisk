@@ -54,6 +54,8 @@ counter = -1
 tot_average_precisionTR = list()
 tot_average_precisionDev = list()
 tot_average_precisionTS = list()
+tot_average_AUC_TS = list()
+
 
 indices_ID = range(X.shape[0])
 for i in range(NUM_TRIALS):
@@ -80,6 +82,7 @@ for i in range(NUM_TRIALS):
             ts_scoreL1 = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
 
             tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
+            tot_average_AUC_TS.append(roc_auc_score(y_cv, ts_scoreL1))
             svm_auc = roc_auc_score(y_cv, ts_scoreL1)
             print('SVM: AUC=%.3f' % (svm_auc))
             svm_fpr, svm_tpr, _ = roc_curve(y_cv, ts_scoreL1)
