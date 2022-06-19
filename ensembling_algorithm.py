@@ -10,9 +10,12 @@ def compute_mean(fi_scores):
 
 
 def drop_and_sort(fi_scores,mean_score):
-    if fi_scores[i] < mean_score:
-        fi_scores.drop(labels=['i'])
-        fi_scores.sort(descending=True)
+    for i in range(fi_scores):
+        if fi_scores[i] < mean_score:
+            fi_scores.drop(labels=['i'])
+            fi_scores.sort(descending=True)
+
+
 
 
 
@@ -62,6 +65,8 @@ drop_and_sort(dl_fi_scores,fv_three)
 
 
 #find the set of overlap
+
+
 
 
 

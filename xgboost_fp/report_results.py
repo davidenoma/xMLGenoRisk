@@ -5,7 +5,7 @@ import pickle
 from sklearn import svm
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import average_precision_score
-# from matplotlib import pyplot
+from matplotlib import pyplot
 
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
