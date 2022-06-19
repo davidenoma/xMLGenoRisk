@@ -22,36 +22,46 @@ def prepare_snps(indices):
        # print(header_file_subset, header_file_string)
 
 def main(genotype_file,phenotype_file):
+
        #Generating the snps list
-       header_file = pd.read_csv(genotype_file,sep=" ")
+
+       header_file = pd.read_csv(genotype_file,sep=" ",nrows=2)
        snps_list = list(header_file.columns.values)
        snps_list = rename_header_snps(snps_list)
        snps_list = pd.DataFrame(snps_list)
+
        #removing the extreme snp
+
        snps_list = snps_list.drop([snps_list.shape[0]-1], axis=0)
        # Writing to file
-       snps_list.to_csv('snps_list_on_file')
 
+       snps_list.to_csv('snps_list_on_file')
+       print('Done writing snps')
 
        #The full genotype file
+
        genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
 
        # removing the extreme snp
+
        genotype_file_full = genotype_file_full.drop([genotype_file_full.shape[1] - 1], axis=1)
+
        #remove the column with the snps name since we already have it on file.
+
        genotype_file_full = genotype_file_full.drop([0],axis=0)
        print(genotype_file_full.shape)
+
        #Removing snps that are missing individuals
+
        genotype_file_full = genotype_file_full.dropna(axis=1)
        print(genotype_file_full.shape)
 
 
        #Checking the write conistency
        genotype_file_full.to_csv('genotype_file_full2',index=False)
-       # genotype_file_full2 = pd.read_csv('genotype_file_full2')
-       # print(genotype_file_full2)
+
        #The phenotype file
        phenotype_file = pd.read_csv(phenotype_file, header=None)
-       # print(phenotype_file)
+
 
 main(sys.argv[1],sys.argv[2])

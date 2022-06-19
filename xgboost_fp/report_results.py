@@ -34,14 +34,15 @@ for j in range(len(best_indices)):
     for k in range(len(best_indices[j])):
         #        temp.append(len(best_indices[j][k]))
         indices_new.append(list(best_indices[j][k]))
-
+print(indices_new)
 indices_new1 = np.unique(np.concatenate(indices_new))
+print(indices_new1.shape)
 
 def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
     classifier.fit(XX_train[:, indices], YY_train)
     ts_score = classifier.predict_proba(XX_validation[:, indices])
-    print(ts_score)
+    # print(ts_score)
     return ts_score[:, 1]
 
 
