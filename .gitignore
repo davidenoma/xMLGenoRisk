@@ -13,4 +13,4 @@
 **/logs/**
 /.idea/**
 /data/**
-/FeatureImportanceDL/logs/**
+/FeatureImportanceDL/logs/*
