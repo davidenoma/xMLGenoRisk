@@ -47,16 +47,21 @@ def loading_with_pyspark(genotype_file):
     pdf = spark.read.options(maxColumns=2000000).csv(genotype_file, sep=" ", header=None, nullValue='NA')
     genotype_file_full = pdf.toPandas()
     genotype_file_full.columns = [i for i in range(genotype_file_full.shape[1])]
+    # removing the extreme snp
+    genotype_file_full = genotype_file_full.drop([genotype_file_full.shape[1] - 1], axis=1)
+    # remove the column with the snps name since we already have it on file.
+    genotype_file_full = genotype_file_full.drop([0], axis=0)
+    # Removing snps that are missing individuals
+    genotype_file_full = genotype_file_full.dropna(axis=1)
+    genotype_file_full.to_csv('genotype_file_full2', index=False)
 
+    return genotype_file_full
 
-
-def main(genotype_file, phenotype_file):
-    # The full genotype file
-    # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
 
     # applying chunking with pandas because of memory.
     # It would be useful to compare the memory consumption differences also with pyspark
-    df = pd.read_csv("42snps", sep=" ", chunksize=10, header=None)
+def loading_with_chunking(genotype_file):
+    df = pd.read_csv(genotype_file, sep=" ", chunksize=10, header=None)
     y = list()
     for data in df:
         # removing the extreme snp
@@ -70,8 +75,12 @@ def main(genotype_file, phenotype_file):
     # Removing snps that are missing individuals
     genotype_file_full = genotype_file_full.dropna(axis=1)
     genotype_file_full.to_csv('genotype_file_full2', index=False)
-    # The phenotype file
-    # phenotype_file = pd.read_csv(phenotype_file, header=None)
+
+    return genotype_file_full
+
+def main(genotype_file ):
+    # The full genotype file
+    # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
 
     # The input file is a numpy file and will have indices from 0 to the number of snps
     # so the link with the indices_from_main_file will direct us to the  snps.
@@ -83,5 +92,5 @@ def main(genotype_file, phenotype_file):
 
     #then to optimization
     #X = genotype_file_full2.values.astype(np.int64)
-main("42snps", "hapmap_phenotype_recoded")
-# main(sys.argv[1],sys.argv[2])
+# main("42snps", "hapmap_phenotype_recoded")
+main(sys.argv[1])
