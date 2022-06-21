@@ -58,5 +58,5 @@ def main(genotype_file,phenotype_file):
        #The phenotype file
        # phenotype_file = pd.read_csv(phenotype_file, header=None)
 
-main("42snps","hapmap_phenotype_recoded")
-# main(sys.argv[1],sys.argv[2])
+# main("42snps","hapmap_phenotype_recoded")
+main(sys.argv[1],sys.argv[2])
