@@ -159,6 +159,8 @@ print(scores_key_values)
 plt.barh(list(scores_key_values.keys()), list(scores_key_values.values()))
 plt.xlabel("Xgboost Feature Importance not optimized")
 plt.show()
+
+
 #The model feature importances with optimiztion
 imp_model_opt = XGBClassifier(**trial_acc.params,use_label_encoder=False)
 imp_model_opt.fit(X, y.values.ravel())
@@ -173,12 +175,6 @@ plt.show()
 #sorting the features
 sorted_idx = imp_model_opt.feature_importances_.argsort()
 plt.barh(list(scores_opt_key_values.keys())[array(sorted_idx)], list(scores_opt_key_values.values())[array(sorted_idx)])
-
-
-
-
-
-
 
 # optimizing for recall
 study = optuna.create_study(direction="maximize")

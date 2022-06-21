@@ -83,6 +83,7 @@ for i in range(NUM_TRIALS):
 
             tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
             tot_average_AUC_TS.append(roc_auc_score(y_cv, ts_scoreL1))
+
             svm_auc = roc_auc_score(y_cv, ts_scoreL1)
             print('SVM: AUC=%.3f' % (svm_auc))
             svm_fpr, svm_tpr, _ = roc_curve(y_cv, ts_scoreL1)

@@ -1,9 +1,10 @@
 import os,sys,getopt
 from os import write
-
+import numpy as np
 import pandas as pd
 from numpy import array
-
+import pyspark.pandas as ps
+from pyspark.sql import SparkSession
 
 def rename_header_snps(snps_list):
        final_snps = []
@@ -20,9 +21,7 @@ def prepare_snps(indices):
        header_file_string = str(header_file_subset)
        return header_file_string
        # print(header_file_subset, header_file_string)
-
-def main(genotype_file,phenotype_file):
-
+def generating_snps_list(genotype_file):
        #Generating the snps list
 
        header_file = pd.read_csv(genotype_file,sep=" ",nrows=2)
@@ -35,33 +34,33 @@ def main(genotype_file,phenotype_file):
        snps_list = snps_list.drop([snps_list.shape[0]-1], axis=0)
        # Writing to file
 
-       snps_list.to_csv('snps_list_on_file')
+       snps_list.to_csv('snps_list_on_file.csv')
        print('Done writing snps')
-
+def main(genotype_file,phenotype_file):
        #The full genotype file
-
-       genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
-
+       #using pyspark because of the memory consumption
+       spark = SparkSession.builder.config('spark.sql.debug.maxToStringFields',2000).getOrCreate()
+       pdf = spark.read.options(maxColumns=None).csv(genotype_file, sep=" ", header=None,nanValue='NA')
+       pdf.na
+       print(pdf.columns)
+       # pdf = ps.read_csv(genotype_file, sep=" ", header=None)
+       # print(pdf)
+       genotype_file_full = pdf.toPandas()
+       genotype_file_full.columns = [i for i in range(genotype_file_full.shape[1])]
+       # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None,dtype=np.int8, skiprows=1)
        # removing the extreme snp
-
        genotype_file_full = genotype_file_full.drop([genotype_file_full.shape[1] - 1], axis=1)
 
        #remove the column with the snps name since we already have it on file.
-
        genotype_file_full = genotype_file_full.drop([0],axis=0)
        print(genotype_file_full.shape)
-
        #Removing snps that are missing individuals
-
        genotype_file_full = genotype_file_full.dropna(axis=1)
        print(genotype_file_full.shape)
-
-
        #Checking the write conistency
        genotype_file_full.to_csv('genotype_file_full2',index=False)
-
        #The phenotype file
-       phenotype_file = pd.read_csv(phenotype_file, header=None)
+       # phenotype_file = pd.read_csv(phenotype_file, header=None)
 
-
-main(sys.argv[1],sys.argv[2])
+main("42snps","hapmap_phenotype_recoded")
+# main(sys.argv[1],sys.argv[2])
