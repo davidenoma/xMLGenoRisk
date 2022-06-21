@@ -3,7 +3,6 @@ from os import write
 import numpy as np
 import pandas as pd
 from numpy import array
-import pyspark.pandas as ps
 from pyspark.sql import SparkSession
 
 def rename_header_snps(snps_list):
@@ -40,14 +39,11 @@ def main(genotype_file,phenotype_file):
        #The full genotype file
        #using pyspark because of the memory consumption
        spark = SparkSession.builder.config('spark.sql.debug.maxToStringFields',2000).getOrCreate()
-       pdf = spark.read.options(maxColumns=None).csv(genotype_file, sep=" ", header=None,nanValue='NA')
-       pdf.na
-       print(pdf.columns)
-       # pdf = ps.read_csv(genotype_file, sep=" ", header=None)
-       # print(pdf)
+       pdf = spark.read.options(maxColumns=None).csv(genotype_file, sep=" ", header=None,nullValue='NA')
        genotype_file_full = pdf.toPandas()
        genotype_file_full.columns = [i for i in range(genotype_file_full.shape[1])]
-       # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None,dtype=np.int8, skiprows=1)
+
+       # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
        # removing the extreme snp
        genotype_file_full = genotype_file_full.drop([genotype_file_full.shape[1] - 1], axis=1)
 
