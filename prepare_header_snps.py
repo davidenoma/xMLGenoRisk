@@ -38,7 +38,7 @@ def generating_snps_list(genotype_file):
 def main(genotype_file,phenotype_file):
        #The full genotype file
        #using pyspark because of the memory consumption
-       spark = SparkSession.builder.config('spark.sql.debug.maxToStringFields',2000).config("spark.driver.memory", "128g").getOrCreate()
+       spark = SparkSession.builder.config('spark.sql.debug.maxToStringFields',2000).config("spark.driver.memory", "120g").getOrCreate()
        pdf = spark.read.options(maxColumns=2000000).csv(genotype_file, sep=" ", header=None,nullValue='NA')
        genotype_file_full = pdf.toPandas()
        genotype_file_full.columns = [i for i in range(genotype_file_full.shape[1])]
