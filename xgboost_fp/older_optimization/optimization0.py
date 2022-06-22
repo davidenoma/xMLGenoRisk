@@ -24,6 +24,9 @@ X = pd.read_csv('../../Xsubset.csv',header=None)
 Y = pd.read_csv('../../hapmap_phenotype_recoded',header=None)
 Y.replace([1,2], [0,1], inplace = True)
 #Conversion to numpy
+
+
+
 def main(X,Y):
     X = X.values.astype(np.int64)
     Y = Y.values.astype(np.int64)

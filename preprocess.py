@@ -85,6 +85,7 @@ def main(genotype_file ):
     # The input file is a numpy file and will have indices from 0 to the number of snps
     # so the link with the indices_from_main_file will direct us to the  snps.
 
+    genotype_file_full2 = loading_with_chunking(genotype_file)
     #so we write it to file for future reference
     input_indices_from_main_file = genotype_file_full2.columns.values
     input_indices_from_main_file = pd.DataFrame(input_indices_from_main_file)
@@ -92,5 +93,5 @@ def main(genotype_file ):
 
     #then to optimization
     #X = genotype_file_full2.values.astype(np.int64)
-# main("42snps", "hapmap_phenotype_recoded")
+# main("42snps", )
 main(sys.argv[1])
