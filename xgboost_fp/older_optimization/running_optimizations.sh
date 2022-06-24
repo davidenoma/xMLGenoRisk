@@ -1,1 +1,0 @@
-python2.7 optimization0.py

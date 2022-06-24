@@ -36,9 +36,9 @@ for j in range(len(best_indices)):
     for k in range(len(best_indices[j])):
         #        temp.append(len(best_indices[j][k]))
         indices_new.append(list(best_indices[j][k]))
-print(indices_new)
+# print(indices_new)
 indices_new1 = np.unique(np.concatenate(indices_new))
-print(indices_new1.shape)
+print(indices_new1)
 
 def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
@@ -87,7 +87,7 @@ for i in range(NUM_TRIALS):
             svm_auc = roc_auc_score(y_cv, ts_scoreL1)
             print('SVM: AUC=%.3f' % (svm_auc))
             svm_fpr, svm_tpr, _ = roc_curve(y_cv, ts_scoreL1)
-            pyplot.plot(svm_fpr, svm_tpr,marker='.')
+            # pyplot.plot(svm_fpr, svm_tpr,marker='.')
             pyplot.show()
 
 print(str('Train Average precision: ') + str(np.mean(tot_average_precisionTR) * 100) + str('std: ') + str(
