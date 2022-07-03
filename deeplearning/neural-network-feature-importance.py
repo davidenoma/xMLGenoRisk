@@ -16,6 +16,7 @@ import pandas as pd
 
 genotype_generated = pd.read_csv('../Xsubset.csv', header=None)
 phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded',header=None)
+
 genotype_generated = genotype_generated.to_numpy()
 phenotype_generated = phenotype_generated.to_numpy()
 phenotype_generated = phenotype_generated.reshape(len(phenotype_generated),)
