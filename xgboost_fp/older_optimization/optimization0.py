@@ -25,10 +25,13 @@ def main(X,Y):
     #Load and convert to numpy
     X = pd.read_csv(X, header=None)
     X = X.values.astype(np.int64)
+    #we need the values without the numpy header
+    X = X[1:,:]
 
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
     Y = Y.values.astype(np.int64)
+
     Y  = Y.ravel()
 
     print(X,X.shape,X.dtype)
