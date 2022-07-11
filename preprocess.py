@@ -72,13 +72,14 @@ def loading_with_chunking(genotype_file):
     genotype_file_full = final.drop([0], axis=0)
 
     genotype_file_full = final.drop([0], axis=0)
+
     # Removing snps that are missing individuals
     genotype_file_full = genotype_file_full.dropna(axis=1)
     genotype_file_full.to_csv('genotype_file_full2', index=False)
 
     return genotype_file_full
 
-def main(genotype_file ):
+def main(genotype_file):
     # The full genotype file
     # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
 

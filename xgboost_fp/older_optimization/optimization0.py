@@ -1,4 +1,6 @@
 #First we oprimize n_estimators = [50, 100], max_depth and learning_rate.
+import sys
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
@@ -19,16 +21,13 @@ np.random.seed(0)
 #X = np.random.randint(3, size=(200, 1000))
 #Y = np.random.randint(2, size=(200, ))
 
-
-X = pd.read_csv('../../Xsubset.csv',header=None)
-Y = pd.read_csv('../../hapmap_phenotype_recoded',header=None)
-Y.replace([1,2], [0,1], inplace = True)
-#Conversion to numpy
-
-
-
 def main(X,Y):
+    #Load and convert to numpy
+    X = pd.read_csv(X, header=None)
     X = X.values.astype(np.int64)
+
+    Y = pd.read_csv(Y, header=None)
+    Y.replace([1, 2], [0, 1], inplace=True)
     Y = Y.values.astype(np.int64)
     Y  = Y.ravel()
 
@@ -67,3 +66,5 @@ def main(X,Y):
     f = open('best_grid_results_stage1_kuopio_0.pckl', 'wb')
     pickle.dump(best_grid_results, f)
     f.close()
+
+main(sys.argv[1],sys.argv[2])
