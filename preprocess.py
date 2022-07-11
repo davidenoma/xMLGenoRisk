@@ -83,7 +83,7 @@ def main(genotype_file ):
     # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
 
     # The input file is a numpy file and will have indices from 0 to the number of snps
-    # so the link with the indices_from_main_file will direct us to the  snps.
+    # so the link with the idndices_from_main_file will direct us to the  snps.
 
     genotype_file_full2 = loading_with_chunking(genotype_file)
     #so we write it to file for future reference
@@ -93,5 +93,5 @@ def main(genotype_file ):
 
     #then to optimization
     #X = genotype_file_full2.values.astype(np.int64)
-# main("42snps", )
-main(sys.argv[1])
+main("42snps", )
+# main(sys.argv[1])

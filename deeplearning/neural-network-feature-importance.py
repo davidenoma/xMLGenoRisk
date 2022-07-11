@@ -59,6 +59,10 @@ for j in range(X_test.shape[1]):
   f.append(f_j)
 # Plot
 
+#Permutation feature importance scores
+
+
+
 print(f[0:int(len(f)/percent)])
 plt.figure(figsize=(10, 5))
 plt.bar(range(int(X_test.shape[1]/percent)), f[0:int(len(f)/percent)], color="r", alpha=0.7)

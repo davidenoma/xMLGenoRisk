@@ -66,65 +66,6 @@ def objective_accuracy(trial):
     accuracy = accuracy_score(y_test, pred_labels)
     return accuracy
 
-# the second objective is recall
-def objective_recall(trial):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=234)
-    dtrain = xgb.DMatrix(X_train, label=y_train)
-    dtest = xgb.DMatrix(X_test, label=y_test)
-    param = {
-        "verbosity": 0,
-        # logistic regression for binary classification, output probability
-        "objective": "binary:logistic",
-        # use exact for small dataset.
-        "tree_method": "auto",
-        "eval_metric": "auc",
-        # The booster parameter sets the type of learner. Usually this is either a tree
-        # or a linear function. In the case of trees, the model will consist of an ensemble
-        # of trees. For the linear booster, it will be a weighted sum of linear functions.
-        # defines booster, gblinear for linear functions.
-        "booster": trial.suggest_categorical("booster", ["gbtree", "gblinear", "dart"]),
-        # L2 regularization weight.
-        "lambda": trial.suggest_float("lambda", 1e-8, 1.0, log=True),
-        # L1 regularization weight.
-        "alpha": trial.suggest_float("alpha", 1e-8, 1.0, log=True),
-        # sampling ratio for training data.
-        "subsample": trial.suggest_float("subsample", 0.2, 1.0),
-        # sampling according to each tree.
-        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.2, 1.0),
-    }
-    # if param["booster"] == "gbtree" or param["booster"] == "dart":
-    #     # maximum depth of the tree, signifies complexity of the tree.
-    #     param["max_depth"] = trial.suggest_int("max_depth", 1, 7, step=2)
-    #     # minimum child weight, larger the term more conservative the tree.
-    #     param["min_child_weight"] = trial.suggest_int("min_child_weight", 2, 10)
-    #     # "eta" shrinks the feature weights to make the boosting process more conservative.
-    #     param["eta"] = trial.suggest_float("eta", 1e-8, 1.0, log=True)
-    #     # Minimum loss reduction required to make a further partition on a leaf node of the tree.
-    #     # The larger gamma is, the more conservative the algorithm will be.
-    #     param["gamma"] = trial.suggest_float("gamma", 1e-8, 1.0, log=True)
-    #     #  Controls the way new nodes are added to the tree.
-    #     param["grow_policy"] = trial.suggest_categorical("grow_policy", ["depthwise", "lossguide"])
-
-    # if param["booster"] == "dart":
-    #     # Type of sampling algorithm.
-    #     param["sample_type"] = trial.suggest_categorical("sample_type", ["uniform", "weighted"])
-    #     # Type of normalization algorithm.
-    #     param["normalize_type"] = trial.suggest_categorical("normalize_type", ["tree", "forest"])
-    #     # Dropout rate (a fraction of previous trees to drop during the dropout).
-    #     param["rate_drop"] = trial.suggest_float("rate_drop", 1e-8, 1.0, log=True)
-    #     # Probability of skipping the dropout procedure during a boosting iteration.
-    #     param["skip_drop"] = trial.suggest_float("skip_drop", 1e-8, 1.0, log=True)
-    # Call Back for Pruning
-    # Pruning is used to terminate unpromising trials early, so that computing time can be used for trials that show more potential.
-    pruning_callback = optuna.integration.XGBoostPruningCallback(trial, "validation-auc")
-    bst = xgb.train(param, dtrain, evals=[(dtest, "validation")], callbacks=[pruning_callback], verbose_eval=False)
-    preds = bst.predict(dtest)
-    # np.rint means return integer. It rounds up elements to the nearest integer.
-    # This is done so we can use accuracy_score because "binary:logistic" outputs probability not discrete numbers [0,1] but the probability of each sample being 1
-    pred_labels = np.rint(preds)
-    Recall = recall_score(y_test, pred_labels)
-    return Recall
-
 # optimizing for accuracy
 study = optuna.create_study(direction="maximize")
 study.optimize(objective_accuracy, n_trials=100, timeout=600, show_progress_bar=False)

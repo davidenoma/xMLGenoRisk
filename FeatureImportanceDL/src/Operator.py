@@ -6,6 +6,8 @@ from tensorflow.python.keras.callbacks import TensorBoard
 
 
 class OperatorNetwork:
+
+
     def __init__(self, x_batch_size, mask_batch_size, tensorboard_logs_dir="", add_mopt_perf_metric=True,
                  use_early_stopping=True):
         self.batch_size = mask_batch_size * x_batch_size

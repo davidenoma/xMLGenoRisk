@@ -16,6 +16,7 @@ def main(genotype_file, phenotype_file):
     for data in df:
         y.append(data)
     genotype_file_full2 = pd.concat([data for data in y], ignore_index=True)
+
     # so we write it to file for future reference
     input_indices_from_main_file = genotype_file_full2.columns.values
     input_indices_from_main_file = pd.DataFrame(input_indices_from_main_file)
