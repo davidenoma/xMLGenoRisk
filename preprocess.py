@@ -3,7 +3,7 @@ from os import write
 import numpy as np
 import pandas as pd
 from numpy import array
-from pyspark.sql import SparkSession
+# from pyspark.sql import SparkSession
 
 
 def rename_header_snps(snps_list):
