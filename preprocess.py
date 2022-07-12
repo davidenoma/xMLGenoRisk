@@ -35,6 +35,7 @@ def generating_snps_list(genotype_file):
     snps_list = snps_list.drop([snps_list.shape[0] - 1], axis=0)
     # Writing to file
     snps_list.to_csv('snps_list_on_file.csv')
+    exist
     print('Done writing snps')
 
 
@@ -81,7 +82,8 @@ def main(genotype_file):
     # The full genotype file
     # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
 
-    generating_snps_list(genotype_file)
+    # generating_snps_list(genotype_file)
+
     # The input file is a numpy file and will have indices from 0 to the number of snps
     # so the link with the idndices_from_main_file will direct us to the  snps.
 
