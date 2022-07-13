@@ -70,7 +70,7 @@ def loading_with_chunking(genotype_file):
     # remove the column with the snps name since we already have it on file.
     genotype_file_full = final.drop([0], axis=0)
 
-    genotype_file_full = final.drop([0], axis=0)
+    # genotype_file_full = final.drop([0], axis=0)
 
     # Removing snps that are missing individuals
     genotype_file_full = genotype_file_full.dropna(axis=1)
