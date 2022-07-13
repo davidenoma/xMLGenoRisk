@@ -39,7 +39,7 @@ def main(X,Y):
     X = X.values.astype(np.int64)
     #we need the values without the numpy header
     X = X[1:,:]
-
+    print(' DONE READING')
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
     Y = Y.values.astype(np.int64)
