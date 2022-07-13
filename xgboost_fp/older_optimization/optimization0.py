@@ -1,4 +1,5 @@
 #First we oprimize n_estimators = [50, 100], max_depth and learning_rate.
+import os
 import sys
 
 from sklearn.model_selection import train_test_split
@@ -23,7 +24,18 @@ np.random.seed(0)
 
 def main(X,Y):
     #Load and convert to numpy
-    X = pd.read_csv(X, header=None)
+    # X = pd.read_csv(X, header=None)
+    df = pd.read_csv(X, chunksize=10, header=None, low_memory=False)
+    y = list()
+    counter = 1
+    for data in df:
+        # removing the extreme snp
+        data = data.drop([data.shape[1] - 1], axis=1)
+        print("Chunk Number: ",counter)
+        y.append(data)
+        counter = counter+1
+    final = pd.concat([data for data in y], ignore_index=True)
+    X=final
     X = X.values.astype(np.int64)
     #we need the values without the numpy header
     X = X[1:,:]
@@ -46,7 +58,10 @@ def main(X,Y):
     learning_rate = [0.001, 0.01, 0.1]
     # For the parameter tuning.
     param_grid = dict(max_depth=max_depth, n_estimators=n_estimators, learning_rate=learning_rate)
-    model = XGBClassifier(seed=0, nthread=5)
+    # # threads = os.sched_setaffinity(0) - 1
+    # print(os.cpu_count())
+    model = XGBClassifier(seed=0, nthread= 64 )
+
     tot_grid_results = list()
     best_grid_results = list()
     for i in range(NUM_TRIALS):

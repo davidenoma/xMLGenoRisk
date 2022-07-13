@@ -3,7 +3,7 @@ from os import write
 import numpy as np
 import pandas as pd
 from numpy import array
-# from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession
 
 
 def rename_header_snps(snps_list):
@@ -42,7 +42,7 @@ def generating_snps_list(genotype_file):
 def loading_with_pyspark(genotype_file):
     # using pyspark because of the memory consumption
     spark = SparkSession.builder.config('spark.sql.debug.maxToStringFields', 2000).config("spark.driver.memory",
-                                                                                          "120g").getOrCreate()
+                                                                                       "120g").getOrCreate()
     pdf = spark.read.options(maxColumns=2000000).csv(genotype_file, sep=" ", header=None, nullValue='NA')
     genotype_file_full = pdf.toPandas()
     genotype_file_full.columns = [i for i in range(genotype_file_full.shape[1])]
@@ -60,18 +60,18 @@ def loading_with_pyspark(genotype_file):
     # applying chunking with pandas because of memory.
     # It would be useful to compare the memory consumption differences also with pyspark
 def loading_with_chunking(genotype_file):
-    df = pd.read_csv(genotype_file, sep=" ", chunksize=10, header=None)
+    df = pd.read_csv(genotype_file, sep=" ", chunksize=10, header=None, low_memory=False)
     y = list()
+    counter = 1
     for data in df:
         # removing the extreme snp
         data = data.drop([data.shape[1] - 1], axis=1)
+        print("Chunk Number: ",counter)
         y.append(data)
+        counter = counter+1
     final = pd.concat([data for data in y], ignore_index=True)
     # remove the column with the snps name since we already have it on file.
     genotype_file_full = final.drop([0], axis=0)
-
-    # genotype_file_full = final.drop([0], axis=0)
-
     # Removing snps that are missing individuals
     genotype_file_full = genotype_file_full.dropna(axis=1)
     genotype_file_full.to_csv('genotype_file_full2', index=False)
