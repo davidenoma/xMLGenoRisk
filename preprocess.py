@@ -81,9 +81,7 @@ def loading_with_chunking(genotype_file):
 def main(genotype_file):
     # The full genotype file
     # genotype_file_full = pd.read_csv(genotype_file, sep=" ", header=None)
-
     # generating_snps_list(genotype_file)
-
     # The input file is a numpy file and will have indices from 0 to the number of snps
     # so the link with the idndices_from_main_file will direct us to the  snps.
 

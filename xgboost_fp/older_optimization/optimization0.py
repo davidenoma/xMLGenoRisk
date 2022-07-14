@@ -43,7 +43,6 @@ def main(X,Y):
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
     Y = Y.values.astype(np.int64)
-
     Y  = Y.ravel()
 
     print(X,X.shape,X.dtype)
@@ -60,7 +59,7 @@ def main(X,Y):
     param_grid = dict(max_depth=max_depth, n_estimators=n_estimators, learning_rate=learning_rate)
     # # threads = os.sched_setaffinity(0) - 1
     # print(os.cpu_count())
-    model = XGBClassifier(seed=0, nthread= 64 )
+    model = XGBClassifier(seed=0, nthread=64 )
 
     tot_grid_results = list()
     best_grid_results = list()
