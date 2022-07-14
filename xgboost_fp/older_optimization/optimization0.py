@@ -25,7 +25,7 @@ np.random.seed(0)
 def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=10, header=None, low_memory=False)
+    df = pd.read_csv(X, chunksize=10, header=None, low_memory=False,verbose=True)
     y = list()
     counter = 1
     for data in df:
