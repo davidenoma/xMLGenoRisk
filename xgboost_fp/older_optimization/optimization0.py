@@ -1,7 +1,6 @@
 #First we oprimize n_estimators = [50, 100], max_depth and learning_rate.
 import os
 import sys
-
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
@@ -10,6 +9,11 @@ import pandas as pd
 import pickle
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import GridSearchCV
+
+# save numpy array as npz file
+from numpy import asarray
+from numpy import savez_compressed
+
 
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
@@ -25,7 +29,7 @@ np.random.seed(0)
 def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=10, header=None, low_memory=False,verbose=True)
+    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False,verbose=True)
     y = list()
     counter = 1
     for data in df:
@@ -39,6 +43,9 @@ def main(X,Y):
     X = X.values.astype(np.int64)
     #we need the values without the numpy header
     X = X[1:,:]
+    # save numpy array as npz file
+    savez_compressed('genotype.npz', X)
+
     print(' DONE READING')
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
