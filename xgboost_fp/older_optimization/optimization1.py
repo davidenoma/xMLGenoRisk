@@ -59,7 +59,7 @@ def main(X,Y):
     learning_rate = [0.001, 0.01, 0.1]
     # For the parameter tuning.
     param_grid = dict(max_depth=max_depth, n_estimators=n_estimators, learning_rate=learning_rate)
-    model = XGBClassifier(seed=0, nthread=5)
+    model = XGBClassifier(seed=0, nthread=64)
     tot_grid_results = list()
     best_grid_results = list()
     for i in range(NUM_TRIALS):
