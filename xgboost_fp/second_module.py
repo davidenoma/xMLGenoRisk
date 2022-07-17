@@ -3,6 +3,8 @@
 # of our proposed approach on randomly-generated data
 
 # output: best_indices_cvt_auc_recall3, the best indices found from validation data
+import sys
+
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 import numpy as np
@@ -17,61 +19,6 @@ from sklearn import svm
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
 
-# loading data
-#  creating random genotyped data with the same size as the data used in the original manuscript
-
-
-# Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
-X = pd.read_csv('../Xsubset.csv',header=None)
-Y = pd.read_csv('../hapmap_phenotype_recoded',header=None)
-Y.replace([1,2], [0,1], inplace = True)
-# X = X.dropna(axis='columns')
-# X.columns = np.arange(X.shape[1])
-# X=np.int64(X)
-# Y= np.int64(Y)
-# Y=Y.ravel()
-
-#Conversion to numpy
-X = X.values.astype(np.int64)
-Y = Y.values.astype(np.int64)
-Y  = Y.ravel()
-
-# X = np.random.randint(3, size=(109L, 1002L))
-# Y = np.random.randint(2, size=(109L, ))
-
-#print('before dropping: ',X.shape,X.columns)
-
-#Subsetting the dataset
-# X_subset_2 = X.iloc[:,0:X.shape[0]]
-# X_subset_2 = pd.DataFrame(X_subset_2)
-# X_subset_2.to_csv('Xsubset_2.csv')
-
-#print(X.columns)
-# col = X.shape[0]
-# row = X.shape[1]
-#
-# nums = np.arange(0,row)
-# prevIndex = X.columns
-#changing indexing to numbers
-# X = pd.read_csv('Xsubset.csv',header=None)
-
-# XGBoost achieved optimal hyperparameters [log_loss, {learning_rate, max_depth, n_estimators}]
-# for 10 iterative process.
-f = open('older_optimization/best_grid_results_stage1_kuopio_0.pckl', 'rb')
-best0 = pickle.load(f)
-f.close()
-
-f = open('older_optimization/best_grid_results_stage1_kuopio_1.pckl', 'rb')
-best1 = pickle.load(f)
-f.close()
-
-f = open('older_optimization/best_grid_results_stage1_kuopio_2.pckl', 'rb')
-best2 = pickle.load(f)
-f.close()
-
-f = open('older_optimization/best_grid_results_stage1_kuopio_7.pckl', 'rb')
-best7 = pickle.load(f)
-f.close()
 
 
 # Stage 2 functions
@@ -224,45 +171,92 @@ def build_XGboost(n_estimatorss, max_depthh, learning_ratee, subsamplee):
 
 
 # Tuning
-NUM_TRIALS = 10
-best_indices_cvt_auc_recall = list()
-for i in range(NUM_TRIALS):
-    print(i)
-    x, x_cv, y, y_cv = train_test_split(X, Y, test_size=0.2, train_size=0.8, stratify=Y, random_state=i)
-    # optimizing xgboost parameters: never seen on x_cv and y_cv
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-    # Comparison
-    temp_vec_log = [-best0[i][0], -best1[i][0], -best2[i][0]]  # lower the better
-    temp_n_est = [best0[i][1]['n_estimators'], best1[i][1]['n_estimators'], best2[i][1]['n_estimators']]
-    temp_max_depth = [best0[i][1]['max_depth'], best1[i][1]['max_depth'], best2[i][1]['max_depth']]
-    temp_lr = [best0[i][1]['learning_rate'], best1[i][1]['learning_rate'], best2[i][1]['learning_rate']]
-    inx_best = np.argsort(temp_vec_log)[0]
+def main(X,Y):
+    # Load and convert to numpy
+    # X = pd.read_csv(X, header=None)
+    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False, verbose=True)
+    y = list()
+    counter = 1
+    for data in df:
+        # removing the extreme snp
+        data = data.drop([data.shape[1] - 1], axis=1)
+        print("Chunk Number: ", counter)
+        y.append(data)
+        counter = counter + 1
+    final = pd.concat([data for data in y], ignore_index=True)
+    X = final
+    X = X.values.astype(np.int64)
+    # we need the values without the numpy header
+    X = X[1:, :]
 
-    temp_vec_log1 = [-best7[i][0]]  # lower the better
-    temp_subsample = [best7[i][1]['subsample']]
-    inx_best1 = np.argsort(temp_vec_log1)[0]
+    # save numpy array as npz file
+    # savez_compressed('genotype.npz', X)
 
-    # Fix model for all 5 cvs
-    # defining an XGBoost model from obtained optimal hyperparameters
-    model = build_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
-#   print(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
-    best_indices_cv_auc_recall = list()
+    print(' DONE READING')
+    Y = pd.read_csv(Y, header=None)
+    Y.replace([1, 2], [0, 1], inplace=True)
+    Y = Y.values.astype(np.int64)
+    Y = Y.ravel()
+    print(Y.shape, Y.dtype)
 
-    # Important: same train and test split as xgboost optimization codes  by fixing random seed
-    for train, test in cv.split(x, y):
-        X_train = x[train]
-        Y_train = y[train]
-        X_test = x[test]
-        Y_test = y[test]
+    # XGBoost achieved optimal hyperparameters [log_loss, {learning_rate, max_depth, n_estimators}]
+    # for 10 iterative process.
+    f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
+    best0 = pickle.load(f)
+    f.close()
 
-        xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
-        print("xgboost_scores1",xgboost_scores1)
-        best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
-        best_indices_cv_auc_recall.append(best_indices_au_recall)
+    f = open('best_grid_results_stage1_kuopio_1.pckl', 'rb')
+    best1 = pickle.load(f)
+    f.close()
 
-    best_indices_cvt_auc_recall.append(best_indices_cv_auc_recall)
+    f = open('best_grid_results_stage1_kuopio_2.pckl', 'rb')
+    best2 = pickle.load(f)
+    f.close()
 
-# save the best indices found in each iteration
-f = open('best_indices_cvt_auc_recall3.pckl', 'wb')
-pickle.dump(best_indices_cvt_auc_recall, f)
-f.close()
+    f = open('best_grid_results_stage1_kuopio_7.pckl', 'rb')
+    best7 = pickle.load(f)
+    f.close()
+
+    NUM_TRIALS = 10
+    best_indices_cvt_auc_recall = list()
+    for i in range(NUM_TRIALS):
+        print(i)
+        x, x_cv, y, y_cv = train_test_split(X, Y, test_size=0.2, train_size=0.8, stratify=Y, random_state=i)
+        # optimizing xgboost parameters: never seen on x_cv and y_cv
+        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
+        # Comparison
+        temp_vec_log = [-best0[i][0], -best1[i][0], -best2[i][0]]  # lower the better
+        temp_n_est = [best0[i][1]['n_estimators'], best1[i][1]['n_estimators'], best2[i][1]['n_estimators']]
+        temp_max_depth = [best0[i][1]['max_depth'], best1[i][1]['max_depth'], best2[i][1]['max_depth']]
+        temp_lr = [best0[i][1]['learning_rate'], best1[i][1]['learning_rate'], best2[i][1]['learning_rate']]
+        inx_best = np.argsort(temp_vec_log)[0]
+
+        temp_vec_log1 = [-best7[i][0]]  # lower the better
+        temp_subsample = [best7[i][1]['subsample']]
+        inx_best1 = np.argsort(temp_vec_log1)[0]
+
+        # Fix model for all 5 cvs
+        # defining an XGBoost model from obtained optimal hyperparameters
+        model = build_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
+    #   print(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
+        best_indices_cv_auc_recall = list()
+
+        # Important: same train and test split as xgboost optimization codes  by fixing random seed
+        for train, test in cv.split(x, y):
+            X_train = x[train]
+            Y_train = y[train]
+            X_test = x[test]
+            Y_test = y[test]
+
+            xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
+            print("xgboost_scores1",xgboost_scores1)
+            best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
+            best_indices_cv_auc_recall.append(best_indices_au_recall)
+
+        best_indices_cvt_auc_recall.append(best_indices_cv_auc_recall)
+
+    # save the best indices found in each iteration
+    f = open('best_indices_cvt_auc_recall3.pckl', 'wb')
+    pickle.dump(best_indices_cvt_auc_recall, f)
+    f.close()
+main(sys.argv[1],sys.argv[2])
