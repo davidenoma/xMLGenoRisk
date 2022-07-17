@@ -25,7 +25,6 @@ np.random.seed(0)
 #696, 125041
 #X = np.random.randint(3, size=(200, 1000))
 #Y = np.random.randint(2, size=(200, ))
-
 def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)

@@ -7,7 +7,9 @@ import pickle
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import GridSearchCV
 import sys
-
+# save numpy array as npz file
+from numpy import asarray
+from numpy import savez_compressed
 
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
@@ -24,7 +26,7 @@ np.random.seed(0)
 def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=10, header=None, low_memory=False)
+    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False,verbose=True)
     y = list()
     counter = 1
     for data in df:
@@ -38,6 +40,12 @@ def main(X,Y):
     X = X.values.astype(np.int64)
     #we need the values without the numpy header
     X = X[1:,:]
+
+
+    # save numpy array as npz file
+    # savez_compressed('genotype.npz', X)
+
+
     print(' DONE READING')
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
@@ -74,3 +82,4 @@ def main(X,Y):
     f = open('best_grid_results_stage1_kuopio_1.pckl', 'wb')
     pickle.dump(best_grid_results, f)
     f.close()
+main(sys.argv[1],sys.argv[2])
