@@ -6,7 +6,7 @@ import pandas as pd
 import pickle
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import GridSearchCV
-
+import sys
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
 
@@ -94,3 +94,4 @@ def main(X,Y):
     pickle.dump(best_grid_results, f)
     f.close()
 
+main(sys.argv[1],sys.argv[2])
