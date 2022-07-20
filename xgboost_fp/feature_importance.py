@@ -38,7 +38,7 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
 
-model = XGBClassifier(nthread=4, seed=0, n_estimators=n_estimators, max_depth=max_depth,learning_rate=learning_rate)
+model = XGBClassifier(nthread=64, seed=0, n_estimators=n_estimators, max_depth=max_depth,learning_rate=learning_rate)
 eval_set = [(X_test, y_test)]
 # Removing this parameter
 # eval_set=eval_set
