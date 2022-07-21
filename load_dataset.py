@@ -1,9 +1,34 @@
-genotype_generated = pd.read_csv('../Xsubset.csv', header=None)
-phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded',header=None)
-genotype_generated = genotype_generated.to_numpy()
-phenotype_generated = phenotype_generated.to_numpy()
-phenotype_generated = phenotype_generated.reshape(len(phenotype_generated),)
+import sys
 
-# Create a train/test split
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
+import pandas as pd
+import numpy as np
+
+
+def main(X,Y):
+    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False, verbose=True)
+    y = list()
+    counter = 1
+    for data in df:
+      # removing the extreme snp
+      data = data.drop([data.shape[1] - 1], axis=1)
+      print("Chunk Number: ", counter)
+      y.append(data)
+      counter = counter + 1
+    final = pd.concat([data for data in y], ignore_index=True)
+    X = final
+    X = X.values.astype(np.int64)
+    # we need the values without the numpy header
+    X = X[1:, :]
+
+    # save numpy array as npz file
+    # savez_compressed('genotype.npz', X)
+    print(' DONE READING')
+
+    Y = pd.read_csv(Y, header=None)
+    Y.replace([1, 2], [0, 1], inplace=True)
+    Y = Y.values.astype(np.int64)
+    Y = Y.ravel()
+    print(Y.shape, Y.dtype)
+    return X,Y
+# if __name__ == '__main__':
+#     main(sys.argv[1],sys.argv[2])

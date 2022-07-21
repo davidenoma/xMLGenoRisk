@@ -1,14 +1,15 @@
 #This is the entrance mwthod for the framework.
+import os
 import sys
+# import preprocess
+import deeplearning.neural_network_feature_importance as DL_fp
 
-import preload
-import preprocess
+#'C:/Users/HP/OneDrive/Desktop/PROJECT RESULTS/'
 
-
-def main(genotype_file):
-    preprocess.main(genotype_file)
+def main(X,Y):
+    os.system(DL_fp,X,Y)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1],sys.argv[2])
 
