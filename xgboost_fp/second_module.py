@@ -53,7 +53,7 @@ def cal_XGboost_feature_importance(X_train, Y_train, indices, model, X_test, Y_t
     scores_key_values = model_1.get_booster().get_score(importance_type='gain')
     index_non_zero = list()
     for i in range(len(scores_key_values.keys())): # getting indices of used features in xgboost in [0, len(indices)]
-        index_non_zero.append(np.int64(scores_key_values.keys()[i][1:]))# indices of keys
+        index_non_zero.append(np.int64(list(scores_key_values.keys())[i][1:]))# indices of keys
     sorted_values = np.argsort(scores_key_values.values())[::-1] # argsorting based on gain and getting corresponding top indices.
     from_top_temp = indices[np.array(index_non_zero)[sorted_values]]   # in range [0,125041]
     zir_from_top = np.array(list(set(indices)^set(indices[np.array(index_non_zero)[sorted_values]])))
@@ -87,7 +87,7 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
             index_non_zero4 = list()
             for uu in range(
                     len(scores4_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
-                index_non_zero4.append(np.int64(scores4_key_values.keys()[uu][1:]))  # indices of keys
+                index_non_zero4.append(np.int64(list(scores4_key_values.keys())[uu][1:]))  # indices of keys
             sorted_values4 = np.argsort(scores4_key_values.values())[
                              ::-1]  # argsorting based on gain and getting corresponding top indices.
             M_top = []
@@ -100,7 +100,7 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
             index_non_zero5 = list()
             for uu in range(
                     len(scores5_key_values.keys())):  # getting indices of used features in xgboost in [0, len(indices)]
-                index_non_zero5.append(np.int64(scores5_key_values.keys()[uu][1:]))  # indices of keys
+                index_non_zero5.append(np.int64(list(scores5_key_values.keys())[uu][1:]))  # indices of keys
             sorted_values5 = np.argsort(scores5_key_values.values())[
                              ::-1]  # argsorting based on gain and getting corresponding top indices.
             M_bottom_temp = SNPs_indices_sorted[-M - i:][np.array(index_non_zero5)[sorted_values5]]
