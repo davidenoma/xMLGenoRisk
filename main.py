@@ -7,9 +7,11 @@ import deeplearning.neural_network_feature_importance as DL_fp
 #'C:/Users/HP/OneDrive/Desktop/PROJECT RESULTS/'
 
 def main(X,Y):
-    os.system(DL_fp,X,Y)
+    hi = ""
+    os.system(DL_fp)
 
 
 if __name__ == '__main__':
     main(sys.argv[1],sys.argv[2])
+
 

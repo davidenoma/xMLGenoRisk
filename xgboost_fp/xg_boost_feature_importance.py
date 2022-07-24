@@ -13,6 +13,9 @@ max_depth = 8
 # [0.001, 0.01, 0.1]
 learning_rate = 0.001
 
+
+
+
 genotype_generated = pd.read_csv('../Xsubset.csv', header=None)
 phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded',header=None)
 

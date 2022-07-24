@@ -68,6 +68,7 @@ def get_feature_importance(j, n):
 
 # Feature importances
 percent = 10
+
 f = []
 for j in range(X_test.shape[1]):
   f_j = get_feature_importance(j, 100)
@@ -85,6 +86,7 @@ plt.xlabel("Feature")
 plt.ylabel("Importance")
 plt.title("Feature importances (GPRCA data set)")
 plt.show()
+plt.savefig("Feature importances (GPRCA data set)")
 
 
 

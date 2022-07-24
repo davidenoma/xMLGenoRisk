@@ -125,7 +125,7 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
     average_index_non_zero = list()
     for i in range(
             len(xgboost_scores.keys())):  # getting indices of selected features from training set. Indices are in [0,125041]
-        average_index_non_zero.append(np.int64(xgboost_scores.keys()[i][1:]))
+        average_index_non_zero.append(np.int64(list(xgboost_scores.keys())[i][1:]))
 
     MM = [2, 4, 6, 8, 10, 20, 30]  # window size (Algorithm 1 step 2)
     K_increament = [1, 2, 3, 4, 5]  # adaptively increase window size (Algorithm 1 step 5)

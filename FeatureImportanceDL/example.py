@@ -14,6 +14,8 @@ mask_batch_size = 32
 # final batch_size is data_batch_size x mask_batch_size
 
 s = 100  # size of optimal subset that we are looking for or the size of the snps that we need
+
+
 #we coudl use percentages for this from the total number of features.
 s_p = 2  # number of flipped bits in a mask when looking around m_opt
 
@@ -49,10 +51,7 @@ dataset_label = "GNP_"
 print(X_tr.shape,X_val.shape,X_te.shape)
 print(y_tr.shape,y_val.shape,y_te.shape)
 
-# # Get one hot encoding of the labels
-# y_tr = get_one_hot(y_tr.astype(np.int8), 4)
-# y_te = get_one_hot(y_te.astype(np.int8), 4)
-# y_val = get_one_hot(y_val.astype(np.int8), 4)
+
 
 # Create the framework, needs number of features and batch_sizes, str_id for tensorboard
 fs = FeatureSelector(FEATURE_SHAPE, s, data_batch_size, mask_batch_size, str_id=dataset_label)
