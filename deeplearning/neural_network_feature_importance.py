@@ -37,12 +37,12 @@ Y = Y.values.astype(np.int64)
 Y = Y.ravel()
 print(Y.shape, Y.dtype)
 
-
-
 # Create a train/test split
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train ,y_test = train_test_split(X,Y,test_size=0.2)
 # X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11)
+
+
 # Create a classifier
 # clf = MLPClassifier(hidden_layer_sizes=(8, 4),learning_rate_init=0.01)
 clf = MLPClassifier(hidden_layer_sizes=(150,100,50),learning_rate_init=0.01,max_iter=300,solver='adam',activation = 'relu',random_state=1)
@@ -65,28 +65,39 @@ def get_feature_importance(j, n):
     total += s_ij
   return s - total / n
 
-
-# Feature importances
-percent = 10
-
 f = []
 for j in range(X_test.shape[1]):
   f_j = get_feature_importance(j, 100)
   f.append(f_j)
-# Plot
+
 #Permutation feature importance scores
-print(f[0:int(len(f)/percent)])
-plt.figure(figsize=(10, 5))
+top_features_idx = dict(zip([x for x in range(X_test.shape[1])], f))
+top_features_sorted_idx = pd.DataFrame.from_dict(top_features_idx,orient='index')
+
+top_features_sorted_idx.columns  = ['Importance_scores']
 
 
-plt.bar(range(int(X_test.shape[1]/percent)), f[0:int(len(f)/percent)], color="r", alpha=0.7)
-plt.xticks(ticks=range(int(X_test.shape[1]/percent)))
+top_features_sorted_idx = top_features_sorted_idx.sort_values(by=["Importance_scores"],ascending=False)
 
+top_length = top_features_sorted_idx.shape[0]
+
+top_1_percent = top_features_sorted_idx.iloc[:int(top_length/100),:]
+top_5_percent = top_features_sorted_idx.iloc[:int(top_length/20),:]
+top_100 = top_features_sorted_idx.iloc[:100,:]
+
+top_1_percent.to_csv('top_1_percent.list')
+
+
+# Plot
+plt.figure(figsize=(10,5))
+plt.bar(list(top_100.index), top_100['Importance_scores'], color="r", alpha=0.7)
+# plt.xticks(ticks=list(top_5_percent.index))
 plt.xlabel("Feature")
 plt.ylabel("Importance")
 plt.title("Feature importances (GPRCA data set)")
+plt.savefig("Feature importances (GPRCA data set).png",dpi=300)
 plt.show()
-plt.savefig("Feature importances (GPRCA data set)")
+
 
 
 
