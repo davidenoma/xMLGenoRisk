@@ -86,6 +86,7 @@ top_5_percent = top_features_sorted_idx.iloc[:int(top_length/20),:]
 top_100 = top_features_sorted_idx.iloc[:100,:]
 
 top_1_percent.to_csv('top_1_percent.list')
+top_100.to_csv('top_100.list')
 
 
 # Plot
