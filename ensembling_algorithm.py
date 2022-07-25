@@ -39,6 +39,7 @@ def prepare_header_snps(snps_file_name):
 XGBOOST_TOP_SNPS = pd.read_csv('xgboost_fp/top_snps.list')
 RANDOM_FOREST_TOP_SNPS = pd.read_csv('randomforest/top_snps.list')
 DL_TOP_SNPS = pd.read_csv('FeatureImportanceDL/top_snps.list')
+DL_TOP_SNPS = pd.read_csv('deep_learning/top_snps.list')
 
 xgboost_fi_scores = pd.read_csv('xgboost_fp/top_snps.list')
 random_forest_fi_scores = pd.read_csv('randomforest/top_snps.list')

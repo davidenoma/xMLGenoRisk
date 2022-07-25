@@ -45,7 +45,7 @@ X_train, X_test, y_train ,y_test = train_test_split(X,Y,test_size=0.2)
 
 # Create a classifier
 # clf = MLPClassifier(hidden_layer_sizes=(8, 4),learning_rate_init=0.01)
-clf = MLPClassifier(hidden_layer_sizes=(150,100,50),learning_rate_init=0.01,max_iter=300,solver='adam',activation = 'relu',random_state=1)
+clf = MLPClassifier(hidden_layer_sizes=(300,150,50,1),max_iter=500, learning_rate_init=0.001,solver='adam',activation = 'logistic')
 # Fit the classifier using the training set
 clf.fit(X_train, y_train)
 # Evaluate the classifier using the test set
@@ -83,18 +83,19 @@ top_length = top_features_sorted_idx.shape[0]
 
 top_1_percent = top_features_sorted_idx.iloc[:int(top_length/100),:]
 top_5_percent = top_features_sorted_idx.iloc[:int(top_length/20),:]
-top_100 = top_features_sorted_idx.iloc[:100,:]
+top_50 = top_features_sorted_idx.iloc[:50,:]
 
-top_1_percent.to_csv('top_1_percent.list')
-top_100.to_csv('top_100.list')
+top_1_percent.to_csv('deeplearning/top_1_percent.list')
+top_50.to_csv('top_100.list')
 
 
 # Plot
 plt.figure(figsize=(10,5))
-plt.bar(list(top_100.index), top_100['Importance_scores'], color="r", alpha=0.7)
+plt.bar([str(x) for x in list(top_50.index)], top_50['Importance_scores'], color="r", alpha=0.7)
 # plt.xticks(ticks=list(top_5_percent.index))
 plt.xlabel("Feature")
 plt.ylabel("Importance")
+
 plt.title("Feature importances (GPRCA data set)")
 plt.savefig("Feature importances (GPRCA data set).png",dpi=300)
 plt.show()
