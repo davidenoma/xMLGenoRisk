@@ -11,7 +11,7 @@ import pandas as pd
 
 X = sys.argv[1]
 Y = sys.argv[2]
-print(X,Y)
+
 df = pd.read_csv(X, chunksize=5, header=None, low_memory=False, verbose=True)
 y = list()
 counter = 1
@@ -37,15 +37,24 @@ Y = Y.values.astype(np.int64)
 Y = Y.ravel()
 print(Y.shape, Y.dtype)
 
+
+# from fast_ml.model_development import train_valid_test_split
+#
+# X_train, y_train, X_valid, y_valid, X_test, y_test = train_valid_test_split(df, target = 'SalePrice',
+#                                                                             method='sorted', sort_by_col='saledate',
+#                                                                             train_size=0.8, valid_size=0.1, test_size=0.1)
+
 # Create a train/test split
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train ,y_test = train_test_split(X,Y,test_size=0.2)
+
+
 # X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11)
 
 
 # Create a classifier
 # clf = MLPClassifier(hidden_layer_sizes=(8, 4),learning_rate_init=0.01)
-clf = MLPClassifier(hidden_layer_sizes=(300,150,50,1),max_iter=500, learning_rate_init=0.001,solver='adam',activation = 'logistic')
+clf = MLPClassifier(hidden_layer_sizes=(300,150,50,1),max_iter=500, learning_rate_init=0.01,solver='adam',activation = 'logistic',verbose=True)
 # Fit the classifier using the training set
 clf.fit(X_train, y_train)
 # Evaluate the classifier using the test set

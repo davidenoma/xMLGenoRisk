@@ -1,29 +1,24 @@
 
 # random forest for feature importance on a classification problem
-from sklearn.datasets import make_classification
+import sys
 from sklearn.ensemble import RandomForestClassifier
 from matplotlib import pyplot
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import numpy as np
 
 # define dataset
-genotype_generated = pd.read_csv('../Xsubset.csv', header=None)
-#Snps_list
-snpslist = pd.read_csv('../snps_list_shorter.txt', header=None)
-snpslist_reshape = snpslist.values.reshape(snpslist.shape[1])
-genotype_generated.columns = snpslist_reshape
-
-#PHENOTYPE FILE
-phenotype_generated = pd.read_csv('../hapmap_phenotype_recoded', header=None)
-phenotype_generated = phenotype_generated.to_numpy()
-phenotype_generated = phenotype_generated.reshape(len(phenotype_generated),)
-
-X_train, X_test, y_train ,y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2)
+import load_dataset
+X = sys.argv[1]
+Y = sys.argv[2]
+X,Y = load_dataset.main(X,Y)
+X_train, X_test, y_train ,y_test = train_test_split(X,Y,test_size=0.2)
 # X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_state=1)
 # define the model
 model = RandomForestClassifier()
 # fit the model
-model.fit(genotype_generated, phenotype_generated)
+model.fit(X, Y)
 # get importance
 importance = model.feature_importances_
 # summarize feature importance
@@ -35,23 +30,6 @@ pyplot.bar([x for x in range(len(importance))], importance)
 
 # pyplot.show()
 
-
-"""
-==========================================
-Feature importances with a forest of trees
-==========================================
-
-This example shows the use of a forest of trees to evaluate the importance of
-features on an artificial classification task. The blue bars are the feature
-importances of the forest, along with their inter-trees variability represented
-by the error bars.
-
-As expected, the plot suggests that 3 features are informative, while the
-remaining are not.
-"""
-print(__doc__)
-import matplotlib.pyplot as plt
-
 # %%
 # Data generation and model fitting
 # ---------------------------------
@@ -61,7 +39,7 @@ import matplotlib.pyplot as plt
 # our dataset into training and testing subsets.
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(genotype_generated,phenotype_generated,test_size=0.2,random_state=10)
+X_train, X_test, y_train, y_test = train_test_split(X,Y,test_size=0.2,random_state=10)
 # %%
 # A random forest classifier will be fitted to compute the feature importances.
 from sklearn.ensemble import RandomForestClassifier
@@ -89,7 +67,7 @@ std = np.std([
     tree.feature_importances_ for tree in forest.estimators_], axis=0)
 # %%
 # Let's plot the impurity-based importance.
-import pandas as pd
+
 forest_importances = pd.Series(importances, index=feature_names)
 fig, ax = plt.subplots()
 forest_importances.plot.bar(yerr=std, ax=ax)
@@ -97,9 +75,6 @@ ax.set_title("Feature importances using MDI")
 ax.set_ylabel("Mean decrease in impurity")
 fig.tight_layout()
 
-# %%
-# We observe that, as expected, the three first features are found important.
-#
 # Feature importance based on feature permutation
 # -----------------------------------------------
 # Permutation feature importance overcomes limitations of the impurity-based
@@ -123,9 +98,3 @@ ax.set_title("Feature importances using permutation on full model")
 ax.set_ylabel("Mean accuracy decrease")
 fig.tight_layout()
 plt.show()
-
-# %%
-# The same features are detected as most important using both methods. Although
-# the relative importances vary. As seen on the plots, MDI is less likely than
-# permutation importance to fully omit a feature.
-
