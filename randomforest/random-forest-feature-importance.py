@@ -1,20 +1,32 @@
-
 # random forest for feature importance on a classification problem
+# define dataset
+
+import inspect
+import os
 import sys
-from sklearn.ensemble import RandomForestClassifier
-from matplotlib import pyplot
-import pandas as pd
-from sklearn.model_selection import train_test_split
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+from loading_and_cleaning import load_dataset
+
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from matplotlib import pyplot
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
-# define dataset
-import load_dataset
+
+
 X = sys.argv[1]
 Y = sys.argv[2]
-X,Y = load_dataset.main(X,Y)
-X_train, X_test, y_train ,y_test = train_test_split(X,Y,test_size=0.2)
-# X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_state=1)
+
+X, Y = load_dataset.main(X, Y)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+# X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_stxate=1)
 # define the model
 model = RandomForestClassifier()
 # fit the model
@@ -22,26 +34,18 @@ model.fit(X, Y)
 # get importance
 importance = model.feature_importances_
 # summarize feature importance
-print(importance)
-for i,v in enumerate(importance):
-	print('Feature: %0d, Score: %.5f' % (i,v))
+importance = importance[1:50]
+for i, v in enumerate(importance):
+    print('Feature: %0d, Score: %.5f' % (i, v))
 # plot feature importance
 pyplot.bar([x for x in range(len(importance))], importance)
 
 # pyplot.show()
 
-# %%
-# Data generation and model fitting
-# ---------------------------------
-# We generate a synthetic dataset with only 3 informative features. We will
-# explicitly not shuffle the dataset to ensure that the informative features
-# will correspond to the three first columns of X. In addition, we will split
-# our dataset into training and testing subsets.
-from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X,Y,test_size=0.2,random_state=10)
-# %%
-# A random forest classifier will be fitted to compute the feature importances.
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=10)
+
 from sklearn.ensemble import RandomForestClassifier
 
 feature_names = [f'feature {i}' for i in range(X_train.shape[1])]
@@ -49,20 +53,8 @@ feature_names = X_train.columns
 forest = RandomForestClassifier(random_state=10)
 forest.fit(X_train, y_train)
 
-# %%
-# Feature importance based on mean decrease in impurity
-# -----------------------------------------------------
-# Feature importances are provided by the fitted attribute
-# `feature_importances_` and they are computed as the mean and standard
-# deviation of accumulation of the impurity decrease within each tree.
-#
-# .. warning::
-#     Impurity-based feature importances can be misleading for high cardinality
-#     features (many unique values). See :ref:`permutation_importance` as
-#     an alternative below.
-
-import numpy as np
 importances = forest.feature_importances_
+importances = importances[1:50]
 std = np.std([
     tree.feature_importances_ for tree in forest.estimators_], axis=0)
 # %%
@@ -82,6 +74,7 @@ fig.tight_layout()
 # and can be computed on a left-out test set.
 
 from sklearn.inspection import permutation_importance
+
 result = permutation_importance(
     forest, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
 forest_importances = pd.Series(result.importances_mean, index=feature_names)
