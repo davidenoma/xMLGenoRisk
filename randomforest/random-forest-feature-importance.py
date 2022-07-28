@@ -5,20 +5,21 @@ import inspect
 import os
 import sys
 
+
+
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from loading_and_cleaning import load_dataset
-
-
+from deeplearning.neural_network_feature_importance import calc_and_save_feature_imp_scores
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-
+from sklearn.inspection import permutation_importance
 
 
 X = sys.argv[1]
@@ -26,7 +27,6 @@ Y = sys.argv[2]
 
 X, Y = load_dataset.main(X, Y)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
-# X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_redundant=5, random_stxate=1)
 # define the model
 model = RandomForestClassifier()
 # fit the model
@@ -34,32 +34,30 @@ model.fit(X, Y)
 # get importance
 importance = model.feature_importances_
 # summarize feature importance
-importance = importance[1:50]
+top_50,top_1_percent,top_5_percent = calc_and_save_feature_imp_scores(importance,X_test)
+print(top_50,top_1_percent,top_5_percent,sep="\n")
+importance = top_50
+
 for i, v in enumerate(importance):
     print('Feature: %0d, Score: %.5f' % (i, v))
 # plot feature importance
 pyplot.bar([x for x in range(len(importance))], importance)
+pyplot.show()
 
-# pyplot.show()
 
-from sklearn.model_selection import train_test_split
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=10)
-
-from sklearn.ensemble import RandomForestClassifier
-
 feature_names = [f'feature {i}' for i in range(X_train.shape[1])]
 feature_names = X_train.columns
 forest = RandomForestClassifier(random_state=10)
 forest.fit(X_train, y_train)
-
 importances = forest.feature_importances_
 importances = importances[1:50]
 std = np.std([
     tree.feature_importances_ for tree in forest.estimators_], axis=0)
+
 # %%
 # Let's plot the impurity-based importance.
-
 forest_importances = pd.Series(importances, index=feature_names)
 fig, ax = plt.subplots()
 forest_importances.plot.bar(yerr=std, ax=ax)
@@ -72,9 +70,6 @@ fig.tight_layout()
 # Permutation feature importance overcomes limitations of the impurity-based
 # feature importance: they do not have a bias toward high-cardinality features
 # and can be computed on a left-out test set.
-
-from sklearn.inspection import permutation_importance
-
 result = permutation_importance(
     forest, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
 forest_importances = pd.Series(result.importances_mean, index=feature_names)

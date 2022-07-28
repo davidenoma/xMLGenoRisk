@@ -45,8 +45,6 @@ print(Y.shape, Y.dtype)
 # Create a train/test split
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train ,y_test = train_test_split(X,Y,test_size=0.2)
-
-
 # X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11)
 
 
@@ -56,6 +54,10 @@ clf = MLPClassifier(hidden_layer_sizes=(300,150,50,1),max_iter=500, learning_rat
 # Fit the classifier using the training set
 clf.fit(X_train, y_train)
 # Evaluate the classifier using the test set
+
+
+
+
 
 def get_feature_importance(j, n):
   y_pred = clf.predict(X_test)
@@ -78,24 +80,25 @@ for j in range(X_test.shape[1]):
   f.append(f_j)
 
 #Permutation feature importance scores
-top_features_idx = dict(zip([x for x in range(X_test.shape[1])], f))
-top_features_sorted_idx = pd.DataFrame.from_dict(top_features_idx,orient='index')
+def calc_and_save_feature_imp_scores(f,X_test):
 
-top_features_sorted_idx.columns  = ['Importance_scores']
+  top_features_idx = dict(zip([x for x in range(X_test.shape[1])], f))
+  top_features_sorted_idx = pd.DataFrame.from_dict(top_features_idx, orient='index')
+  top_features_sorted_idx.columns = ['Importance_scores']
+  top_features_sorted_idx = top_features_sorted_idx.sort_values(by=["Importance_scores"], ascending=False)
+  top_length = top_features_sorted_idx.shape[0]
+  top_1_percent = top_features_sorted_idx.iloc[:int(top_length / 100), :]
+  top_5_percent = top_features_sorted_idx.iloc[:int(top_length / 20), :]
+  top_50 = top_features_sorted_idx.iloc[:50, :]
+  top_1_percent.to_csv('deeplearning/top_1_percent.list')
+  top_50.to_csv('top_100.list')
 
-
-top_features_sorted_idx = top_features_sorted_idx.sort_values(by=["Importance_scores"],ascending=False)
-
-top_length = top_features_sorted_idx.shape[0]
-
-top_1_percent = top_features_sorted_idx.iloc[:int(top_length/100),:]
-top_5_percent = top_features_sorted_idx.iloc[:int(top_length/20),:]
-top_50 = top_features_sorted_idx.iloc[:50,:]
-
-top_1_percent.to_csv('deeplearning/top_1_percent.list')
-top_50.to_csv('top_100.list')
+  return top_50,top_1_percent,top_5_percent
 
 
+
+
+top_50,top_1_percent = calc_and_save_feature_imp_scores()
 # Plot
 plt.figure(figsize=(10,5))
 plt.bar([str(x) for x in list(top_50.index)], top_50['Importance_scores'], color="r", alpha=0.7)
