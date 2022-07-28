@@ -1,15 +1,13 @@
 # random forest for feature importance on a classification problem
 # define dataset
-
 import inspect
 import os
 import sys
 
-
-
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
+
 
 from loading_and_cleaning import load_dataset
 from deeplearning.neural_network_feature_importance import calc_and_save_feature_imp_scores
@@ -20,7 +18,6 @@ from matplotlib import pyplot
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.inspection import permutation_importance
-
 
 X = sys.argv[1]
 Y = sys.argv[2]
@@ -33,9 +30,10 @@ model = RandomForestClassifier()
 model.fit(X, Y)
 # get importance
 importance = model.feature_importances_
+
 # summarize feature importance
-top_50,top_1_percent,top_5_percent = calc_and_save_feature_imp_scores(importance,X_test)
-print(top_50,top_1_percent,top_5_percent,sep="\n")
+top_50, top_1_percent, top_5_percent = calc_and_save_feature_imp_scores(importance, X_test)
+print(top_50, top_1_percent, top_5_percent, sep="\n")
 importance = top_50
 
 for i, v in enumerate(importance):
@@ -43,8 +41,6 @@ for i, v in enumerate(importance):
 # plot feature importance
 pyplot.bar([x for x in range(len(importance))], importance)
 pyplot.show()
-
-
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=10)
 feature_names = [f'feature {i}' for i in range(X_train.shape[1])]
