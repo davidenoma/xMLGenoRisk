@@ -8,7 +8,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve
 from sklearn.metrics import roc_curve
 from matplotlib import pyplot
-
 # fixing seed: important to have same random train and test split as the optimizing
 np.random.seed(0)
 
@@ -68,18 +67,22 @@ def main(X,Y):
     NUM_TRIALS = 10
     counter = -1
 
+    #Mean Average Precision
+
     tot_average_precisionTR = list()
     tot_average_precisionDev = list()
     tot_average_precisionTS = list()
-    tot_average_AUC_TS = list()
+
+    #average AUC
+    tot_average_AUCTR = list()
+    tot_average_AUCDev = list()
     tot_average_ROC_TS = list()
 
 
     indices_ID = range(X.shape[0])
     for i in range(NUM_TRIALS):
         print(i)
-        x, x_cv, y, y_cv, indices_x, indices_x_cv = train_test_split(X, Y, indices_ID, test_size=0.2,
-                                                                     train_size=0.8, stratify=Y, random_state=i)
+        x, x_cv, y, y_cv, indices_x, indices_x_cv = train_test_split(X, Y, indices_ID, test_size=0.2,train_size=0.8, stratify=Y, random_state=i)
         # optimizing xgboost parameters: never seen on x_cv and y_cv
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
 
@@ -97,15 +100,19 @@ def main(X,Y):
                 # training
                 ts_scoreL1 = all_results_SVM(X_train, Y_train, X_train, Y_train, indices_new[counter])
                 tot_average_precisionTR.append(average_precision_score(Y_train, ts_scoreL1))
-
+                tot_average_AUCTR.append(roc_auc_score(Y_train,ts_scoreL1))
                 # val
                 ts_scoreL1 = all_results_SVM(X_train, Y_train, X_test, Y_test, indices_new[counter])
                 tot_average_precisionDev.append(average_precision_score(Y_test, ts_scoreL1))
+                tot_average_AUCDev.append(roc_auc_score(Y_test, ts_scoreL1))
                 # test
                 ts_scoreL1 = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
-
                 tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
-                tot_average_AUC_TS.append(roc_auc_score(y_cv, ts_scoreL1))
+                tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
+
+
+                # tot_average_AUC_TS.append(roc_auc_score(y_cv, ts_scoreL1))
+
                 tot_average_ROC_TS.append(roc_curve(y_cv, ts_scoreL1))
                 precision, recall, thresholds = precision_recall_curve(y_cv,ts_scoreL1)
 
@@ -134,20 +141,20 @@ def main(X,Y):
     #         svm_tpr_list.append(tot_average_ROC_TS[i][1])
     #         __list.append(tot_average_ROC_TS[i][2])
     # svm_fpr_list = np.array(svm_fpr_list)
-    for i in range(svm_fpr_list.shape[0]):
-        print(len(svm_fpr_list[i]))
-
-    print(svm_fpr_list.shape, np.mean(svm_fpr_list,axis=1))
-    print(len(svm_tpr_list), len(svm_tpr_list[50]))
-    print(len(__list), len(__list[2]))
-
-    svm_fpr_list,svm_tpr_list,__list
-    svm_fpr_mean = np.mean(svm_fpr_list)
-    svm_tpr_mean= np.mean(svm_tpr_list)
-    __mean = np.mean(__list)
-
-    pyplot.plot(svm_fpr_mean, svm_tpr_mean, marker='.')
-    pyplot.show()
+    # for i in range(svm_fpr_list.shape[0]):
+    #     print(len(svm_fpr_list[i]))
+    #
+    # print(svm_fpr_list.shape, np.mean(svm_fpr_list,axis=1))
+    # print(len(svm_tpr_list), len(svm_tpr_list[50]))
+    # # print(len(__list), len(__list[2]))
+    #
+    # svm_fpr_list,svm_tpr_list,__list
+    # svm_fpr_mean = np.mean(svm_fpr_list)
+    # svm_tpr_mean= np.mean(svm_tpr_list)
+    # __mean = np.mean(__list)
+    #
+    # pyplot.plot(svm_fpr_mean, svm_tpr_mean, marker='.')
+    # pyplot.show()
 
 
 
@@ -158,6 +165,18 @@ def main(X,Y):
         np.std(tot_average_precisionDev)))
     print(str('Test Average precision: ') + str(np.mean(tot_average_precisionTS) * 100) + str('std: ') + str(
         np.std(tot_average_precisionTS)))
+
+    print(np.mean(tot_average_AUCTR),np.mean(tot_average_AUCDev),np.mean(tot_average_AUCDev))
+    #
+    # print(str('Train Average AUC: ') + str(np.mean(tot_average_precisionTR) * 100) + str('std: ') + str(
+    #     np.std(tot_average_precisionTR)))
+    # print(str('Val Average precision: ') + str(np.mean(tot_average_precisionDev) * 100) + str('std: ') + str(
+    #     np.std(tot_average_precisionDev)))
+    # print(str('Test Average precision: ') + str(np.mean(tot_average_precisionTS) * 100) + str('std: ') + str(
+    #     np.std(tot_average_precisionTS)))
+    #
+
+
 
 main(sys.argv[1],sys.argv[2])
 
