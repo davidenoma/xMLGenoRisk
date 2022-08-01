@@ -36,14 +36,14 @@ def prepare_header_snps(snps_file_name):
 
 
 #import scores from the different algorithms
-XGBOOST_TOP_SNPS = pd.read_csv('xgboost_fp/top_snps.list')
-RANDOM_FOREST_TOP_SNPS = pd.read_csv('randomforest/top_snps.list')
-DL_TOP_SNPS = pd.read_csv('FeatureImportanceDL/top_snps.list')
-DL_TOP_SNPS = pd.read_csv('deep_learning/top_snps.list')
+XGBOOST_TOP_SNPS = pd.read_csv('xgboost_fp/top_1_percent.list')
+RANDOM_FOREST_TOP_SNPS = pd.read_csv('randomforest/top_1_percent.list')
+DL_TOP_SNPS = pd.read_csv('FeatureImportanceDL/top_1_percent.list')
+DL_TOP_SNPS = pd.read_csv('deep_learning/top_1_percent.list')
 
-xgboost_fi_scores = pd.read_csv('xgboost_fp/top_snps.list')
-random_forest_fi_scores = pd.read_csv('randomforest/top_snps.list')
-dl_fi_scores = pd.read_csv('FeatureImportanceDL/top_snps.list')
+xgboost_fi_scores = pd.read_csv('xgboost_fp/top_1_percent.list')
+random_forest_fi_scores = pd.read_csv('randomforest/top_1_percent.list')
+dl_fi_scores = pd.read_csv('FeatureImportanceDL/top_1_percent.list')
 
 
 #compute the mean of feature importance vectors

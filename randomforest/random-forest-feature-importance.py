@@ -34,15 +34,21 @@ importance = model.feature_importances_
 # summarize feature importance
 top_50, top_1_percent, top_5_percent = calc_and_save_feature_imp_scores(importance, X_test)
 print(top_50, top_1_percent, top_5_percent, sep="\n")
+top_50_num = top_50.to_numpy()
 importance = top_50
 
-for i, v in enumerate(importance):
-    print('Feature: %0d, Score: %.5f' % (i, v))
-# plot feature importance
-pyplot.bar([x for x in range(len(importance))], importance)
+top_1_percent.to_csv('randomforest/top_1_percent.list')
+top_50.to_csv('randomforest/top_50.list')
+
+# Plot
+plt.figure(figsize=(10, 5))
+plt.bar([str(x) for x in list(top_50_num.index)], top_50['Importance_scores'], color="r", alpha=0.7)
+# plt.xticks(ticks=list(top_5_percent.index))
+plt.xlabel("Feature")
+plt.ylabel("Importance")
 pyplot.show()
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=10)
+
 feature_names = [f'feature {i}' for i in range(X_train.shape[1])]
 feature_names = X_train.columns
 forest = RandomForestClassifier(random_state=10)

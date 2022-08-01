@@ -34,13 +34,6 @@ Y.replace([1, 2], [0, 1], inplace=True)
 Y = Y.values.astype(np.int64)
 Y = Y.ravel()
 print(Y.shape, Y.dtype)
-
-# from fast_ml.model_development import train_valid_test_split
-#
-# X_train, y_train, X_valid, y_valid, X_test, y_test = train_valid_test_split(df, target = 'SalePrice',
-#                                                                             method='sorted', sort_by_col='saledate',
-#                                                                             train_size=0.8, valid_size=0.1, test_size=0.1)
-
 # Create a train/test split
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
@@ -49,12 +42,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
 # Create a classifier
 # clf = MLPClassifier(hidden_layer_sizes=(8, 4),learning_rate_init=0.01)
-clf = MLPClassifier(hidden_layer_sizes=(300, 150, 50, 1), max_iter=500, learning_rate_init=0.01, solver='adam',
-                    activation='logistic', verbose=True)
+clf = MLPClassifier(hidden_layer_sizes=(300, 150, 50, 1), max_iter=300, learning_rate_init=0.01, solver='adam',
+                    activation='logistic', verbose=True,random_state=1)
 # Fit the classifier using the training set
 clf.fit(X_train, y_train)
-
-
 # Evaluate the classifier using the test set
 
 
@@ -93,15 +84,15 @@ def calc_and_save_feature_imp_scores(f, X_test):
 
     return top_50, top_1_percent, top_5_percent
 
-top_50, top_1_percent = calc_and_save_feature_imp_scores(f, X_test)
+top_50, top_1_percent, top_5_percent = calc_and_save_feature_imp_scores(f, X_test)
 
 top_1_percent.to_csv('deeplearning/top_1_percent.list')
-top_50.to_csv('top_100.list')
+top_50.to_csv('deeplearning/top_50.list')
 
 # Plot
 plt.figure(figsize=(10, 5))
 plt.bar([str(x) for x in list(top_50.index)], top_50['Importance_scores'], color="r", alpha=0.7)
-# plt.xticks(ticks=list(top_5_percent.index))
+
 plt.xlabel("Feature")
 plt.ylabel("Importance")
 
