@@ -76,7 +76,7 @@ def main(X,Y):
     #average AUC
     tot_average_AUCTR = list()
     tot_average_AUCDev = list()
-    tot_average_ROC_TS = list()
+    tot_average_AUCTS = list()
 
 
     indices_ID = range(X.shape[0])
@@ -108,12 +108,12 @@ def main(X,Y):
                 # test
                 ts_scoreL1 = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
                 tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
-                tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
+                tot_average_AUCTS.append(roc_auc_score(y_cv, ts_scoreL1))
 
 
-                # tot_average_AUC_TS.append(roc_auc_score(y_cv, ts_scoreL1))
 
-                tot_average_ROC_TS.append(roc_curve(y_cv, ts_scoreL1))
+
+                # tot_average_ROC_TS.append(roc_(y_cv, ts_scoreL1))
                 precision, recall, thresholds = precision_recall_curve(y_cv,ts_scoreL1)
 
                 svm_auc = roc_auc_score(y_cv, ts_scoreL1)
@@ -166,7 +166,7 @@ def main(X,Y):
     print(str('Test Average precision: ') + str(np.mean(tot_average_precisionTS) * 100) + str('std: ') + str(
         np.std(tot_average_precisionTS)))
 
-    print(np.mean(tot_average_AUCTR),np.mean(tot_average_AUCDev),np.mean(tot_average_AUCDev))
+    print(np.mean(tot_average_AUCTR),np.mean(tot_average_AUCDev),np.mean(tot_average_AUCTS))
     #
     # print(str('Train Average AUC: ') + str(np.mean(tot_average_precisionTR) * 100) + str('std: ') + str(
     #     np.std(tot_average_precisionTR)))
