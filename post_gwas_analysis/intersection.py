@@ -10,4 +10,5 @@ sum_stats_filter_p_values_5_per = sum_stats_filter_p_values.loc[:,['rs','p_wald'
 
 
 intersect = pd.merge(final_snps_on_file,snps_and_p_vals,how='inner',on=['rs'])
-print(intersect)
+intersect2 = pd.merge(final_snps_on_file,sum_stats_filter_p_values_5_per,how='inner',on=['rs'])
+print(intersect,intersect2)

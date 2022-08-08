@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def main(X,Y):
+def load_data(X, Y):
     df = pd.read_csv(X, chunksize=5, header=None, low_memory=False, verbose=True)
     y = list()
     counter = 1
@@ -29,4 +29,4 @@ def main(X,Y):
     print(Y.shape, Y.dtype)
     return X,Y
 # if __name__ == '__main__':
-#     main(sys.argv[1],sys.argv[2])
+#     load_data(sys.argv[1],sys.argv[2])

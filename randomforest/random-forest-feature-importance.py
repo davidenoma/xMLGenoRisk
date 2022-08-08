@@ -22,7 +22,7 @@ from sklearn.inspection import permutation_importance
 X = sys.argv[1]
 Y = sys.argv[2]
 
-X, Y = load_dataset.main(X, Y)
+X, Y = load_dataset.load_data(X, Y)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 # define the model
 model = RandomForestClassifier()

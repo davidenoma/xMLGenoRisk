@@ -93,5 +93,5 @@ def main(genotype_file):
 
     #then to optimization
     #X = genotype_file_full2.values.astype(np.int64)
-# main("42snps", )
+# load_data("42snps", )
 main(sys.argv[1])
