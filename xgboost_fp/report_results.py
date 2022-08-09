@@ -101,6 +101,7 @@ def draw_roc_curve(x, y, cv, indices_new, title='ROC Curve'):
     plt.legend(loc="lower right")
     plt.show()
     plt.savefig('Train ROC-AUC')
+    plt.close()
 
 def draw_roc_curve_dev(x, y, cv, indices_new, title='ROC Curve for Dev Set'):
     y_real = []
@@ -149,6 +150,7 @@ def draw_roc_curve_dev(x, y, cv, indices_new, title='ROC Curve for Dev Set'):
     plt.legend(loc="lower right")
     plt.savefig('Dev ROC-AUC.png')
     plt.show()
+    plt.close()
 
 
 def draw_roc_curve_Test(x, y, cv, indices_new, title='Test ROC Curve'):
@@ -205,6 +207,7 @@ def draw_roc_curve_Test(x, y, cv, indices_new, title='Test ROC Curve'):
     plt.legend(loc="lower right")
     plt.savefig('Test ROC-AUC.png')
     plt.show()
+    plt.close()
 
 
 def draw_cv_pr_curve(x, y, cv, indices_new, title='Train Precision recall- Curve'):
@@ -258,6 +261,7 @@ def draw_cv_pr_curve(x, y, cv, indices_new, title='Train Precision recall- Curve
     plt.legend(loc="lower right")
     plt.savefig('Train Precision recall- Curve.png')
     plt.show()
+    plt.close()
 def draw_cv_dev_pr_curve(x, y, cv, indices_new, title='Dev Precision recall- Curve'):
 
     y_real = []
@@ -299,6 +303,7 @@ def draw_cv_dev_pr_curve(x, y, cv, indices_new, title='Dev Precision recall- Cur
     plt.legend(loc="lower right")
     plt.savefig('Dev Precision recall- Curve.png')
     plt.show()
+    plt.close()
 
 def draw_cv_test_pr_curve(x, y, cv, indices_new, title='Train Precision recall- Curve'):
     y_real = []
@@ -340,6 +345,7 @@ def draw_cv_test_pr_curve(x, y, cv, indices_new, title='Train Precision recall- 
     plt.legend(loc="lower right")
     plt.savefig('Test Precision recall- Curve.png')
     plt.show()
+    plt.close()
 
 
 def main(X, Y):
