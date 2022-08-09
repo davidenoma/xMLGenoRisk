@@ -42,7 +42,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
 # Create a classifier
 # clf = MLPClassifier(hidden_layer_sizes=(8, 4),learning_rate_init=0.01)
-clf = MLPClassifier(hidden_layer_sizes=(300, 150, 50), max_iter=300, learning_rate_init=0.001, solver='adam',
+clf = MLPClassifier(hidden_layer_sizes=(100,80,5), max_iter=300, learning_rate_init=0.001, solver='adam',
                     activation='logistic', verbose=True,random_state=1)
 # Fit the classifier using the training set
 clf.fit(X_train, y_train)
