@@ -1,59 +1,36 @@
+import inspect
+import os
 import sys
+
+import numpy
+from numpy import interp
 from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
 import pickle
 from sklearn import svm
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve
+from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve, recall_score, auc
 from sklearn.metrics import roc_curve
-from matplotlib import pyplot
+from matplotlib import pyplot, pyplot as plt
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import loading_and_cleaning.load_dataset
+
 # fixing seed: important to have same random train and test split as the optimizing
+
+
 np.random.seed(0)
 
-def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
-    classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
-    classifier.fit(XX_train[:, indices], YY_train)
-    ts_score = classifier.predict_proba(XX_validation[:, indices])
-    # print(ts_score)
-    return ts_score[:, 1]
 
-
-def main(X,Y):
-    # Load and convert to numpy
-    # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False, verbose=True)
-    y = list()
-    counter = 1
-    for data in df:
-        # removing the extreme snp
-        data = data.drop([data.shape[1] - 1], axis=1)
-        print("Chunk Number: ", counter)
-        y.append(data)
-        counter = counter + 1
-    final = pd.concat([data for data in y], ignore_index=True)
-    X = final
-    X = X.values.astype(np.int64)
-    # we need the values without the numpy header
-    X = X[1:, :]
-
-    # save numpy array as npz file
-    # savez_compressed('genotype.npz', X)
-
-    print(' DONE READING')
-    Y = pd.read_csv(Y, header=None)
-    Y.replace([1, 2], [0, 1], inplace=True)
-    Y = Y.values.astype(np.int64)
-    Y = Y.ravel()
-    print(Y.shape, Y.dtype)
-    print(Y.shape, Y.dtype)
-
+def loading_best_indices(X):
     # loading best indices from the output of the clean_second_module.py
     f = open('best_indices_cvt_auc_recall3.pckl', 'rb')
     best_indices = pickle.load(f)
-
     f.close()
-
     indices_new = []
     temp = list()
     for j in range(len(best_indices)):
@@ -62,103 +39,330 @@ def main(X,Y):
             indices_new.append(list(best_indices[j][k]))
     # print(indices_new)
     indices_new1 = np.unique(np.concatenate(indices_new))
-    print(indices_new1)
 
-    NUM_TRIALS = 10
+    print(len(indices_new1), X.shape)
+    return indices_new1
+
+
+def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
+    classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
+    classifier.fit(XX_train[:, indices], YY_train)
+    ts_score = classifier.predict_proba(XX_validation[:, indices])
+    return ts_score[:, 1]
+
+def draw_roc_curve(x, y, cv, indices_new, title='ROC Curve'):
+    y_real = []
+    y_proba = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+    tprs = []
     counter = -1
+    for i, (train_index, test_index) in enumerate(cv.split(x, y)):
+        X_train = x[train_index]
+        Y_train = y[train_index]
+        X_test = x[test_index]
+        Y_test = y[test_index]
+        counter = counter + 1
+        if (len(indices_new[counter])):
+            # Train
+            pred_proba = all_results_SVM(X_train, Y_train, X_train, Y_train, indices_new[counter])
+            tot_average_precisionTR.append(average_precision_score(Y_train, pred_proba))
+            tot_average_AUCTR.append(roc_auc_score(Y_train, pred_proba))
+            y_real.append(Y_train)
+            y_proba.append(pred_proba)
 
-    #Mean Average Precision
+            fpr, tpr, thresholds = roc_curve(Y_train, pred_proba)
+            tprs.append(interp(mean_fpr, fpr, tpr))
+            tprs[-1][0] = 0.0
+            roc_auc = auc(fpr, tpr)
+            aucs.append(roc_auc)
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r',
+             label='Luck', alpha=.8)
 
-    tot_average_precisionTR = list()
-    tot_average_precisionDev = list()
-    tot_average_precisionTS = list()
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    plt.plot(mean_fpr, mean_tpr, color='b',
+             label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
+             lw=2, alpha=.8)
 
-    #average AUC
-    tot_average_AUCTR = list()
-    tot_average_AUCDev = list()
-    tot_average_AUCTS = list()
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+                     label=r'$\pm$ 1 std. dev.')
 
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.show()
+    plt.savefig('Train ROC-AUC')
 
-    indices_ID = range(X.shape[0])
-    for i in range(NUM_TRIALS):
-        print(i)
-        x, x_cv, y, y_cv, indices_x, indices_x_cv = train_test_split(X, Y, indices_ID, test_size=0.2,train_size=0.8, stratify=Y, random_state=i)
-        # optimizing xgboost parameters: never seen on x_cv and y_cv
-        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-
-        svm_fpr_list = list()
-        svm_tpr_list = list()
-        __list = list()
-        for train, test in cv.split(x, y):  # accessing train and test for stage 2 parameter tuning
-            X_train = x[train]
-            Y_train = y[train]
-            X_test = x[test]
-            Y_test = y[test]
-            counter = counter + 1
-
-            if (len(indices_new[counter])):
-                # training
-                ts_scoreL1 = all_results_SVM(X_train, Y_train, X_train, Y_train, indices_new[counter])
-                tot_average_precisionTR.append(average_precision_score(Y_train, ts_scoreL1))
-                tot_average_AUCTR.append(roc_auc_score(Y_train,ts_scoreL1))
-                # val
-                ts_scoreL1 = all_results_SVM(X_train, Y_train, X_test, Y_test, indices_new[counter])
-                tot_average_precisionDev.append(average_precision_score(Y_test, ts_scoreL1))
-                tot_average_AUCDev.append(roc_auc_score(Y_test, ts_scoreL1))
-                # test
-                ts_scoreL1 = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
-                tot_average_precisionTS.append(average_precision_score(y_cv, ts_scoreL1))
-                tot_average_AUCTS.append(roc_auc_score(y_cv, ts_scoreL1))
-
-
-
-
-                # tot_average_ROC_TS.append(roc_(y_cv, ts_scoreL1))
-                precision, recall, thresholds = precision_recall_curve(y_cv,ts_scoreL1)
-
-                svm_auc = roc_auc_score(y_cv, ts_scoreL1)
-                # print('SVM: AUC=%.3f' % (svm_auc))
-                svm_fpr, svm_tpr, _ = roc_curve(y_cv, ts_scoreL1)
-
-            print("len svm_fpr",len(svm_fpr))
-            svm_fpr_list.append(svm_fpr)
-            svm_tpr_list.append(svm_tpr)
-            __list.append(_)
-
-                # pyplot.plot(svm_fpr, svm_tpr,marker='.')
-                # pyplot.savefig('')
-                # pyplot.show()
-
-    # print(len(svm_fpr_list),len(svm_fpr_list[0]),svm_fpr_list[0][0].shape)
-
-    # print(len(tot_average_ROC_TS),len(tot_average_ROC_TS[0]),tot_average_ROC_TS[0][0].shape)
-
-
-    # for i in range(len(tot_average_ROC_TS)):
-    #         # print(i,len(tot_average_ROC_TS[i]),len(tot_average_ROC_TS[i][0]))
-    #         svm_fpr_list.append(tot_average_ROC_TS[i][0])
-    #         # print(svm_fpr_list,len(svm_fpr_list))
-    #         svm_tpr_list.append(tot_average_ROC_TS[i][1])
-    #         __list.append(tot_average_ROC_TS[i][2])
-    # svm_fpr_list = np.array(svm_fpr_list)
-    # for i in range(svm_fpr_list.shape[0]):
-    #     print(len(svm_fpr_list[i]))
-    #
-    # print(svm_fpr_list.shape, np.mean(svm_fpr_list,axis=1))
-    # print(len(svm_tpr_list), len(svm_tpr_list[50]))
-    # # print(len(__list), len(__list[2]))
-    #
-    # svm_fpr_list,svm_tpr_list,__list
-    # svm_fpr_mean = np.mean(svm_fpr_list)
-    # svm_tpr_mean= np.mean(svm_tpr_list)
-    # __mean = np.mean(__list)
-    #
-    # pyplot.plot(svm_fpr_mean, svm_tpr_mean, marker='.')
-    # pyplot.show()
+def draw_roc_curve_dev(x, y, cv, indices_new, title='ROC Curve for Dev Set'):
+    y_real = []
+    y_proba = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+    tprs = []
+    counter = -1
+    for i, (train_index, test_index) in enumerate(cv.split(x, y)):
+        X_train = x[train_index]
+        Y_train = y[train_index]
+        X_test = x[test_index]
+        Y_test = y[test_index]
+        counter = counter + 1
+        if (len(indices_new[counter])):
+            # Dev
+            pred_proba = all_results_SVM(X_train, Y_train, X_test, Y_test, indices_new[counter])
+            tot_average_precisionDev.append(average_precision_score(Y_test, pred_proba))
+            tot_average_AUCDev.append(roc_auc_score(Y_test, pred_proba))
+            y_real.append(Y_test)
+            y_proba.append(pred_proba)
+            fpr, tpr, thresholds = roc_curve(Y_test, pred_proba)
+            tprs.append(interp(mean_fpr, fpr, tpr))
+            tprs[-1][0] = 0.0
+            roc_auc = auc(fpr, tpr)
+            aucs.append(roc_auc)
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r',
+             label='Luck', alpha=.8)
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    plt.plot(mean_fpr, mean_tpr, color='b',
+             label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
+             lw=2, alpha=.8)
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+                     label=r'$\pm$ 1 std. dev.')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.savefig('Dev ROC-AUC.png')
+    plt.show()
 
 
+def draw_roc_curve_Test(x, y, cv, indices_new, title='Test ROC Curve'):
+    y_real = []
+    y_proba = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+    tprs = []
+    counter = -1
+    for i, (train_index, test_index) in enumerate(cv.split(x, y)):
+        X_train = x[train_index]
+        Y_train = y[train_index]
+        X_test = x[test_index]
+        Y_test = y[test_index]
+        counter = counter + 1
+        if (len(indices_new[counter])):
+            # Train
+            pred_proba = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
+            tot_average_precisionTS.append(average_precision_score(y_cv, pred_proba))
+            tot_average_AUCTS.append(roc_auc_score(y_cv, pred_proba))
+            y_real.append(Y_train)
+            y_proba.append(pred_proba)
 
-    # print((tot_average_ROC_TS)[1], len((tot_average_ROC_TS)[1]))
+            fpr, tpr, thresholds = roc_curve(y_cv, pred_proba)
+            tprs.append(interp(mean_fpr, fpr, tpr))
+            tprs[-1][0] = 0.0
+            roc_auc = auc(fpr, tpr)
+            aucs.append(roc_auc)
+
+    # plt.plot(fpr, tpr, lw=1, alpha=0.3,
+    #          label='ROC fold %d (AUC = %0.2f)' % (i, roc_auc))
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r',
+             label='Luck', alpha=.8)
+
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    plt.plot(mean_fpr, mean_tpr, color='b',
+             label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
+             lw=2, alpha=.8)
+
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+                     label=r'$\pm$ 1 std. dev.')
+
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.savefig('Test ROC-AUC.png')
+    plt.show()
+
+
+def draw_cv_pr_curve(x, y, cv, indices_new, title='Train Precision recall- Curve'):
+    """
+    Draw a Cross Validated PR Curve.
+    Keyword Args:
+        classifier: Classifier Object
+        cv: StratifiedKFold Object: (https://stats.stackexchange.com/questions/49540/understanding-stratified-cross-validation)
+        X: Feature Pandas DataFrame
+        y: Response Pandas Series
+
+    Largely taken from: https://stackoverflow.com/questions/29656550/how-to-plot-pr-curve-over-10-folds-of-cross-validation-in-scikit-learn
+    """
+    y_real = []
+    y_proba = []
+    counter = -1
+    for i, (train_index, test_index) in enumerate(cv.split(x, y)):
+        X_train = x[train_index]
+        Y_train = y[train_index]
+        X_test = x[test_index]
+        Y_test = y[test_index]
+        counter = counter + 1
+        if (len(indices_new[counter])):
+            # Train
+            pred_proba = all_results_SVM(X_train, Y_train, X_train, Y_train, indices_new[counter])
+            tot_average_precisionTR.append(average_precision_score(Y_train, pred_proba))
+            tot_average_AUCTR.append(roc_auc_score(Y_train, pred_proba))
+            y_real.append(Y_train)
+            y_proba.append(pred_proba)
+
+            precision, recall, _ = precision_recall_curve(Y_train, pred_proba)
+
+        # # Plotting each individual PR Curve
+        # plt.plot(recall, precision, lw=1, alpha=0.3,
+        #          label='PR fold %d (AUC = %0.2f)' % (i, average_precision_score(Y_train, pred_proba)))
+
+
+    y_real = np.concatenate(y_real)
+    y_proba = np.concatenate(y_proba)
+    precision, recall, _ = precision_recall_curve(y_real, y_proba)
+    plt.plot(recall, precision, color='b',
+             label=r'Precision-Recall (AUC = %0.2f)' % (average_precision_score(y_real, y_proba)),
+             lw=2, alpha=.8)
+    no_skill = len(y_real[y_real == 1]) / len(y_real)
+    plt.plot([0, 1], [no_skill, no_skill], linestyle='--', lw=2, color='r')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.savefig('Train Precision recall- Curve.png')
+    plt.show()
+def draw_cv_dev_pr_curve(x, y, cv, indices_new, title='Dev Precision recall- Curve'):
+
+    y_real = []
+    y_proba = []
+    counter = -1
+    for i, (train_index, test_index) in enumerate(cv.split(x, y)):
+        X_train = x[train_index]
+        Y_train = y[train_index]
+        X_test = x[test_index]
+        Y_test = y[test_index]
+        counter = counter + 1
+        if (len(indices_new[counter])):
+            # Train
+            pred_proba = all_results_SVM(X_train, Y_train, X_test, Y_test, indices_new[counter])
+            y_real.append(Y_test)
+            y_proba.append(pred_proba)
+
+            precision, recall, _ = precision_recall_curve(Y_test, pred_proba)
+
+        # # Plotting each individual PR Curve
+        # plt.plot(recall, precision, lw=1, alpha=0.3,
+        #          label='PR fold %d (AUC = %0.2f)' % (i, average_precision_score(Y_train, pred_proba)))
+
+
+    y_real = np.concatenate(y_real)
+    y_proba = np.concatenate(y_proba)
+    precision, recall, _ = precision_recall_curve(y_real, y_proba)
+    plt.plot(recall, precision, color='b',
+             label=r'Precision-Recall (AUC = %0.2f)' % (average_precision_score(y_real, y_proba)),
+             lw=2, alpha=.8)
+
+    no_skill = len(y_real[y_real == 1]) / len(y_real)
+    plt.plot([0, 1], [no_skill, no_skill], linestyle='--', lw=2, color='r')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.savefig('Dev Precision recall- Curve.png')
+    plt.show()
+
+def draw_cv_test_pr_curve(x, y, cv, indices_new, title='Train Precision recall- Curve'):
+    y_real = []
+    y_proba = []
+    counter = -1
+    for i, (train_index, test_index) in enumerate(cv.split(x, y)):
+        X_train = x[train_index]
+        Y_train = y[train_index]
+        X_test = x[test_index]
+        Y_test = y[test_index]
+        counter = counter + 1
+        if (len(indices_new[counter])):
+            # Train
+            pred_proba = all_results_SVM(X_train, Y_train, x_cv, y_cv, indices_new[counter])
+            y_real.append(y_cv)
+            y_proba.append(pred_proba)
+            precision, recall, _ = precision_recall_curve(y_cv, pred_proba)
+
+        # # Plotting each individual PR Curve
+        # plt.plot(recall, precision, lw=1, alpha=0.3,
+        #          label='PR fold %d (AUC = %0.2f)' % (i, average_precision_score(Y_train, pred_proba)))
+
+
+    y_real = np.concatenate(y_real)
+    y_proba = np.concatenate(y_proba)
+    precision, recall, _ = precision_recall_curve(y_real, y_proba)
+    plt.plot(recall, precision, color='b',
+             label=r'Precision-Recall (AUC = %0.2f)' % (average_precision_score(y_real, y_proba)),
+             lw=2, alpha=.8)
+    # plt.plot([1, 0], [0, 1], linestyle='--', lw=2, color='r',
+    #          alpha=.8)
+    no_skill = len(y_real[y_real == 1]) / len(y_real)
+    plt.plot([0, 1], [no_skill, no_skill], linestyle='--', lw=2, color='r')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.savefig('Test Precision recall- Curve.png')
+    plt.show()
+
+
+def main(X, Y):
+    # f, axes = plt.subplots(1, 2, figsize=(10, 5))
+    cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=1)
+    f = open('best_indices_cvt_auc_recall3.pckl', 'rb')
+    best_indices = pickle.load(f)
+    f.close()
+    indices_new = []
+
+    for j in range(len(best_indices)):
+        for k in range(len(best_indices[j])):
+            #        temp.append(len(best_indices[j][k]))
+            indices_new.append(list(best_indices[j][k]))
+    # print(indices_new)
+    # indices_new = np.unique(np.concatenate(indices_new))
+
+    draw_roc_curve(x, y, cv, indices_new, title='ROC Curve (Train)')
+    draw_roc_curve_dev(x, y, cv, indices_new, title='ROC Curve (Dev)')
+    draw_roc_curve_Test(x, y, cv, indices_new, title='ROC Curve (Test)')
+    draw_cv_pr_curve(x, y, cv, indices_new, title='Precision-Recall Curve (Train)')
+    draw_cv_dev_pr_curve(x, y, cv, indices_new, title='Precision-Recall Curve (Dev)')
+    draw_cv_test_pr_curve(x, y, cv, indices_new, title='Precision-Recall Curve (Test)')
     print(str('Train Average precision: ') + str(np.mean(tot_average_precisionTR) * 100) + str('std: ') + str(
         np.std(tot_average_precisionTR)))
     print(str('Val Average precision: ') + str(np.mean(tot_average_precisionDev) * 100) + str('std: ') + str(
@@ -166,17 +370,23 @@ def main(X,Y):
     print(str('Test Average precision: ') + str(np.mean(tot_average_precisionTS) * 100) + str('std: ') + str(
         np.std(tot_average_precisionTS)))
 
-    print(np.mean(tot_average_AUCTR),np.mean(tot_average_AUCDev),np.mean(tot_average_AUCTS))
-    #
-    # print(str('Train Average AUC: ') + str(np.mean(tot_average_precisionTR) * 100) + str('std: ') + str(
-    #     np.std(tot_average_precisionTR)))
-    # print(str('Val Average precision: ') + str(np.mean(tot_average_precisionDev) * 100) + str('std: ') + str(
-    #     np.std(tot_average_precisionDev)))
-    # print(str('Test Average precision: ') + str(np.mean(tot_average_precisionTS) * 100) + str('std: ') + str(
-    #     np.std(tot_average_precisionTS)))
-    #
+    print(np.mean(tot_average_AUCTR), np.mean(tot_average_AUCDev), np.mean(tot_average_AUCTS))
 
 
+X,Y = loading_and_cleaning.load_data(sys.argv[1], sys.argv[2])
+NUM_TRIALS = 10
+counter = -1
+indices_ID = range(X.shape[0])
+x, x_cv, y, y_cv, indices_x, indices_x_cv = train_test_split(X, Y, indices_ID, test_size=0.2, train_size=0.8,
+                                                             stratify=Y, random_state=1)
+# Mean Average Precision
+tot_average_precisionTR = list()
+tot_average_precisionDev = list()
+tot_average_precisionTS = list()
+# average AUC
+tot_average_AUCTR = list()
+tot_average_AUCDev = list()
+tot_average_AUCTS = list()
 
-main(sys.argv[1],sys.argv[2])
 
+main(sys.argv[1], sys.argv[2])

@@ -20,3 +20,5 @@ snps_list_on_file.csv
 snps_list_shorter.txt
 42snps
 preprocess.sh
+*.png
+*.npz
