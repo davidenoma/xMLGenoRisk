@@ -1,50 +1,58 @@
-import numpy as np
+import inspect
+import sys
 import os
+
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+import numpy as np
+
 from sklearn.model_selection import train_test_split
 import tensorflow.python.keras as keras
 from tensorflow.python.keras import backend as K
+
+from loading_and_cleaning import load_dataset
 from src.FeatureSelector import FeatureSelector
 import pandas as pd
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+#loading data
+X = sys.argv[1]
+Y = sys.argv[2]
+
+X, Y = load_dataset.load_data(X, Y)
+
+X_tr, X_te, y_tr ,y_te = train_test_split(X,Y,test_size=0.1,random_state=10)
+X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11,random_state=10)
+
+
 
 # Training parapmeters
 data_batch_size = 32
 mask_batch_size = 32
 # final batch_size is data_batch_size x mask_batch_size
 
-s = 100  # size of optimal subset that we are looking for or the size of the snps that we need
-
-
+s = 100
+# size of optimal subset that we are looking for or the size of the snps that we need
 #we coudl use percentages for this from the total number of features.
+
 s_p = 2  # number of flipped bits in a mask when looking around m_opt
-
 phase_2_start = 6000  # after how many batches phase 2 will begin
-
 max_batches = 15000  # how many batches if the early stopping condition not satisfied
 early_stopping_patience = 600  # how many patience batches (after phase 2 starts)
 # before the training stops
 
 
-# In total 10 features
-genotype_generated = pd.read_csv('Xsubset.csv', header=None)
-phenotype_generated = pd.read_csv('hapmap_phenotype_recoded',header=None)
-
-genotype_generated = genotype_generated.to_numpy()
-phenotype_generated = phenotype_generated.to_numpy()
-phenotype_generated = phenotype_generated.reshape(len(phenotype_generated),)
-
-
-X_tr, X_te, y_tr ,y_te = train_test_split(genotype_generated,phenotype_generated,test_size=0.1,random_state=10)
-
-X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11,random_state=10)
 
 # Dataset parameters
 N_TRAIN_SAMPLES = X_tr.shape[0]
 N_VAL_SAMPLES = X_val.shape[0]
 N_TEST_SAMPLES = X_te.shape[0]
-N_FEATURES = 1002
-FEATURE_SHAPE = (1002,)
+N_FEATURES = X.shape[1]
+FEATURE_SHAPE = X.shape[1]
 dataset_label = "GNP_"
 
 

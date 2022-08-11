@@ -42,7 +42,7 @@ top_50.to_csv('randomforest/top_50.list')
 
 # Plot
 plt.figure(figsize=(10, 5))
-plt.bar([str(x) for x in list(top_50_num.index)], top_50['Importance_scores'], color="r", alpha=0.7)
+plt.bar([str(x) for x in list(top_50_num)], top_50['Importance_scores'], color="r", alpha=0.7)
 # plt.xticks(ticks=list(top_5_percent.index))
 plt.xlabel("Feature")
 plt.ylabel("Importance")
@@ -50,7 +50,10 @@ pyplot.show()
 
 
 feature_names = [f'feature {i}' for i in range(X_train.shape[1])]
-feature_names = X_train.columns
+# feature_names = X_train.columns
+
+
+
 forest = RandomForestClassifier(random_state=10)
 forest.fit(X_train, y_train)
 importances = forest.feature_importances_
