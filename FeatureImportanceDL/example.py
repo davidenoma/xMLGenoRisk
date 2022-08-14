@@ -8,7 +8,6 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 import numpy as np
-
 from sklearn.model_selection import train_test_split
 import tensorflow.python.keras as keras
 from tensorflow.python.keras import backend as K
@@ -35,7 +34,7 @@ data_batch_size = 32
 mask_batch_size = 32
 # final batch_size is data_batch_size x mask_batch_size
 
-s = 100
+s = X_tr.shape[0]
 # size of optimal subset that we are looking for or the size of the snps that we need
 #we coudl use percentages for this from the total number of features.
 
@@ -91,7 +90,7 @@ optimal_subset = np.nonzero(optimal_mask)
 test_performance = fs.operator.test_one(X_te, optimal_mask[None,:], y_te)
 print("Importances: ", importances,len(importances) )
 
-print("Optimal_subset: ", optimal_subset)
-header_file = pd.read_csv('snps_list_shorter.txt')
+print("Optimal_subset: ", optimal_subset,len(optimal_subset))
+
 print("Test performance (CE): ", test_performance[0])
 print("Test performance (ACC): ", test_performance[1])
