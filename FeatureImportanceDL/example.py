@@ -30,8 +30,8 @@ X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11,random_state=1
 
 
 # Training parapmeters
-data_batch_size = 3
-mask_batch_size = 3
+data_batch_size = 16
+mask_batch_size = 16
 # final batch_size is data_batch_size x mask_batch_size
 
 s = X_tr.shape[0]/100
