@@ -30,11 +30,11 @@ X_tr,X_val,y_tr,y_val = train_test_split(X_tr,y_tr,test_size=0.11,random_state=1
 
 
 # Training parapmeters
-data_batch_size = 32
-mask_batch_size = 32
+data_batch_size = 3
+mask_batch_size = 3
 # final batch_size is data_batch_size x mask_batch_size
 
-s = X_tr.shape[0]
+s = X_tr.shape[0]/100
 # size of optimal subset that we are looking for or the size of the snps that we need
 #we coudl use percentages for this from the total number of features.
 
