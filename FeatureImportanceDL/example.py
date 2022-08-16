@@ -35,7 +35,7 @@ data_batch_size = 16
 mask_batch_size = 16
 # final batch_size is data_batch_size x mask_batch_size
 
-s = int(X_tr.shape[0]/100)
+s = int(X_tr.shape[1]/100)
 # size of optimal subset that we are looking for or the size of the snps that we need
 #we coudl use percentages for this from the total number of features.
 
@@ -89,9 +89,12 @@ fs.train_networks_on_data(X_tr, y_tr, max_batches, val_data=(X_val, y_val))
 importances, optimal_mask = fs.get_importances(return_chosen_features=True)
 optimal_subset = np.nonzero(optimal_mask)
 test_performance = fs.operator.test_one(X_te, optimal_mask[None,:], y_te)
-print("Importances: ", importances,len(importances) )
 
+print("Importances: ", importances,len(importances) )
+importances = pd.DataFrame(importances)
+importances.to_csv('importances.csv')
 print("Optimal_subset: ", optimal_subset)
-header_file = pd.read_csv('snps_list_shorter.txt')
+optimal_subset = pd.DataFrame(optimal_subset)
+optimal_subset.to_csv('optimal_subset.csv')
 print("Test performance (CE): ", test_performance[0])
 print("Test performance (ACC): ", test_performance[1])
