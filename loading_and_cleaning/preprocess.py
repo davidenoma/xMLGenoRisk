@@ -23,7 +23,6 @@ def prepare_snps(indices):
     return header_file_string
     # print(header_file_subset, header_file_string)
 
-
 def generating_snps_list(genotype_file):
     # Generating the snps list
 
@@ -31,6 +30,7 @@ def generating_snps_list(genotype_file):
     snps_list = list(header_file.columns.values)
     snps_list = rename_header_snps(snps_list)
     snps_list = pd.DataFrame(snps_list)
+
     # removing the extreme snp
     snps_list = snps_list.drop([snps_list.shape[0] - 1], axis=0)
     # Writing to file
@@ -89,7 +89,7 @@ def main(genotype_file):
     #so we write it to file for future reference
     input_indices_from_main_file = genotype_file_full2.columns.values
     input_indices_from_main_file = pd.DataFrame(input_indices_from_main_file)
-    input_indices_from_main_file.to_csv('input_indices_from_main_file')
+    input_indices_from_main_file.to_csv('input_indices_from_main_file.csv')
 
     #then to optimization
     #X = genotype_file_full2.values.astype(np.int64)

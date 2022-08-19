@@ -52,7 +52,6 @@ clf.fit(X_train, y_train)
 def get_feature_importance(j, n):
     y_pred = clf.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
-    print(acc)
     s = accuracy_score(y_test, y_pred)  # baseline score
     total = 0.0
     for i in range(n):

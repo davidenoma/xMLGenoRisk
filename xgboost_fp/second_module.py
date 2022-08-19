@@ -110,8 +110,7 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
 
             # replace m top with m bottom  rankked snps
             SNPs_indices_sorted[:M + i] = M_top  # resorting based on new M-top
-            SNPs_indices_sorted[
-            len(SNPs_indices_sorted) - M - i:len(SNPs_indices_sorted)] = M_bottom  # resoritng based on new M-bottom
+            SNPs_indices_sorted[len(SNPs_indices_sorted) - M - i:len(SNPs_indices_sorted)] = M_bottom  # resoritng based on new M-bottom
 
             SNPs_indices_sorted[M + i - N:M + i] = M_bottom[0:N]  # exchange N best M_bottom with N worst M_top
             SNPs_indices_sorted[len(SNPs_indices_sorted) - M - i:len(SNPs_indices_sorted) - M - i + N] = M_top[

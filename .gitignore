@@ -22,3 +22,6 @@ snps_list_shorter.txt
 preprocess.sh
 *.png
 *.npz
+*.list
+*.csv
+

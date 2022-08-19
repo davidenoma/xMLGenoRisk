@@ -88,7 +88,7 @@ fs.train_networks_on_data(X_tr, y_tr, max_batches, val_data=(X_val, y_val))
 #changing the feature importances to false
 importances, optimal_mask = fs.get_importances(return_chosen_features=True)
 optimal_subset = np.nonzero(optimal_mask)
-test_performance = fs.operator.test_one(X_te, optimal_mask[None,:], y_te)
+test_performance = fs.operator.test_one(X_te, optimal_mask, y_te)
 
 print("Importances: ", importances,len(importances) )
 importances = pd.DataFrame(importances)

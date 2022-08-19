@@ -26,7 +26,7 @@ import loading_and_cleaning.load_dataset
 np.random.seed(0)
 
 
-def loading_best_indices(X):
+def loading_best_indices_from_second_module(X):
     # loading best indices from the output of the clean_second_module.py
     f = open('best_indices_cvt_auc_recall3.pckl', 'rb')
     best_indices = pickle.load(f)
@@ -38,10 +38,10 @@ def loading_best_indices(X):
             #        temp.append(len(best_indices[j][k]))
             indices_new.append(list(best_indices[j][k]))
     # print(indices_new)
-    indices_new1 = np.unique(np.concatenate(indices_new))
+    # indices_new = np.unique(np.concatenate(indices_new))
 
-    print(len(indices_new1), X.shape)
-    return indices_new1
+    print(len(indices_new))
+    return indices_new
 
 
 def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
@@ -349,19 +349,8 @@ def draw_cv_test_pr_curve(x, y, cv, indices_new, title='Train Precision recall- 
 
 
 def main(X, Y):
-    # f, axes = plt.subplots(1, 2, figsize=(10, 5))
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=1)
-    f = open('best_indices_cvt_auc_recall3.pckl', 'rb')
-    best_indices = pickle.load(f)
-    f.close()
-    indices_new = []
-
-    for j in range(len(best_indices)):
-        for k in range(len(best_indices[j])):
-            #        temp.append(len(best_indices[j][k]))
-            indices_new.append(list(best_indices[j][k]))
-    # print(indices_new)
-    # indices_new = np.unique(np.concatenate(indices_new))
+    indices_new = loading_best_indices_from_second_module(X)
 
     draw_roc_curve(x, y, cv, indices_new, title='ROC Curve (Train)')
     draw_roc_curve_dev(x, y, cv, indices_new, title='ROC Curve (Dev)')
