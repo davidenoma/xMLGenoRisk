@@ -32,17 +32,22 @@ def loading_best_indices_from_second_module(X):
     best_indices = pickle.load(f)
     f.close()
     indices_new = []
-    temp = list()
     for j in range(len(best_indices)):
         for k in range(len(best_indices[j])):
-            #        temp.append(len(best_indices[j][k]))
             indices_new.append(list(best_indices[j][k]))
-    # print(indices_new)
-    # indices_new = np.unique(np.concatenate(indices_new))
+    # indices_new1 = np.unique(np.concatenate(indices_new))
+    # indices_new2 = list(indices_new1)
 
-    print(len(indices_new))
     return indices_new
 
+def loading_best_indices_from_DL():
+    indices_from_DL_FP = pd.read_csv('optimal_subset.csv')
+    # print(indices_from_DL_FP.iloc[0, :])
+    indices_from_DL_FP_list = []
+    for i in range(indices_from_DL_FP.shape[1]):
+        indices_from_DL_FP_list.append(int(indices_from_DL_FP.iloc[0, i]))
+    print(len(indices_from_DL_FP_list))
+    return list(indices_from_DL_FP_list)
 
 def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices):
     classifier = svm.SVC(probability=True, random_state=3, kernel='linear', C=1.5, class_weight='balanced')
@@ -211,16 +216,6 @@ def draw_roc_curve_Test(x, y, cv, indices_new, title='Test ROC Curve'):
 
 
 def draw_cv_pr_curve(x, y, cv, indices_new, title='Train Precision recall- Curve'):
-    """
-    Draw a Cross Validated PR Curve.
-    Keyword Args:
-        classifier: Classifier Object
-        cv: StratifiedKFold Object: (https://stats.stackexchange.com/questions/49540/understanding-stratified-cross-validation)
-        X: Feature Pandas DataFrame
-        y: Response Pandas Series
-
-    Largely taken from: https://stackoverflow.com/questions/29656550/how-to-plot-pr-curve-over-10-folds-of-cross-validation-in-scikit-learn
-    """
     y_real = []
     y_proba = []
     counter = -1
@@ -351,6 +346,9 @@ def draw_cv_test_pr_curve(x, y, cv, indices_new, title='Train Precision recall- 
 def main(X, Y):
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=1)
     indices_new = loading_best_indices_from_second_module(X)
+    print("type_old", type(indices_new),len(indices_new),indices_new)
+    # indices_new = loading_best_indices_from_DL()
+    # print("type_DL", type(indices_new),len(indices_new),indices_new)
 
     draw_roc_curve(x, y, cv, indices_new, title='ROC Curve (Train)')
     draw_roc_curve_dev(x, y, cv, indices_new, title='ROC Curve (Dev)')
