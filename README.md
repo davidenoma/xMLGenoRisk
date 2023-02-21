@@ -10,5 +10,6 @@ The algorithm involved 10 trials of 5-fold cross-validation for optimization of 
 The area under the Precision-Recall Curve was 0.69, 0.60 and 0.57 on the Train, Dev and Test sets respectively. 
 
 Furthermore, the final number of risk predictive variants was 2798 which were associated with 847 Ensembl genes. Interaction analysis showed that Nodes were 339 and the edges were 622 in the gene interaction network. This shows evidence that the non-linear Machine learning approach offers great possibilities for understanding the genetic basis of complex diseases.
+![image](https://user-images.githubusercontent.com/24875399/220415648-30ccfbf4-9dcb-4174-a0d3-f4d77b86d579.png)
 
-![dd](https://user-images.githubusercontent.com/24875399/188943717-5cf14364-241e-4e37-a3f0-af503f1398db.jpg)
+
