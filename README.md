@@ -5,6 +5,7 @@ Extreme gradient boosting machine learning algorithm identifies genome-wide inte
 
 I applied the XGBoost algorithm and an iterative SNP selection algorithm to find the top features (SNPs) that best predict the risk of developing prostate cancer with a Support Vector Machine (SVM). 
 
+
 <BR>
 <img width="600" alt="image" src="https://github.com/davidenoma/prostate_cancer_genetic_association_risk_pred/assets/24875399/e1af6399-5aa3-4775-8c7b-dd854a01ff8b">
 
