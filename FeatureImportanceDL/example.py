@@ -35,7 +35,7 @@ data_batch_size = 16
 mask_batch_size = 16
 # final batch_size is data_batch_size x mask_batch_size
 
-s = int(X_tr.shape[1]/100)
+s = 100
 # size of optimal subset that we are looking for or the size of the snps that we need
 #we coudl use percentages for this from the total number of features.
 

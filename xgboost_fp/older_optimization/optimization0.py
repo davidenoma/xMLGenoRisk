@@ -28,20 +28,26 @@ np.random.seed(0)
 def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False,verbose=True)
+    df = pd.read_csv(X, chunksize=5, skiprows=1, header=None, low_memory=False,sep=" ",dtype='int8')
     y = list()
     counter = 1
     for data in df:
         # removing the extreme snp
+
         data = data.drop([data.shape[1] - 1], axis=1)
         print("Chunk Number: ",counter)
         y.append(data)
         counter = counter+1
     final = pd.concat([data for data in y], ignore_index=True)
     X=final
-    X = X.values.astype(np.int64)
+    print(X.head(),X.shape)
+    # X = X.values.astype(np.int64)
     #we need the values without the numpy header
-    X = X[1:,:]
+    X.drop([0,1],axis=1,inplace=True)
+    # X = X[1:,:]
+
+    print(X)
+
     # save numpy array as npz file
     savez_compressed('genotype.npz', X)
 
@@ -51,7 +57,7 @@ def main(X,Y):
     Y = Y.values.astype(np.int64)
     Y  = Y.ravel()
 
-    print(X,X.shape,X.dtype)
+
     print(Y.shape,Y.dtype)
 
     #Conversion of phenotype
@@ -61,14 +67,16 @@ def main(X,Y):
     n_estimators = [50, 100]
     max_depth = [2, 4, 6, 8]
     learning_rate = [0.001, 0.01, 0.1]
+
+
     # For the parameter tuning.
     param_grid = dict(max_depth=max_depth, n_estimators=n_estimators, learning_rate=learning_rate)
     # # threads = os.sched_setaffinity(0) - 1
     # print(os.cpu_count())
-    model = XGBClassifier(seed=0, nthread=64 )
-
+    model = XGBClassifier(seed=0, nthread=64)
     tot_grid_results = list()
     best_grid_results = list()
+
     for i in range(NUM_TRIALS):
         print('testing trial',i)
         # Dividing into training and test set.x
