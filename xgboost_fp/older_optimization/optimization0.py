@@ -84,7 +84,7 @@ def main(X,Y):
                                             random_state=i)
         # optimizing xgboost parameters: never seen on x_cv and y_cv
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-        grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=1, cv=cv, verbose=1)
+        grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=32, cv=cv, verbose=1)
         grid_result = grid_search.fit(x, y)
         tot_grid_results.append(grid_result)
         best_grid_results.append([grid_result.best_score_, grid_result.best_params_])
