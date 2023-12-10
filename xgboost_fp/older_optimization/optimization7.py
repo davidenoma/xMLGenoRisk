@@ -27,7 +27,6 @@ def main(X,Y):
     counter = 1
     for data in df:
         # removing the extreme snp
-
         data = data.drop([data.shape[1] - 1], axis=1)
         print("Chunk Number: ",counter)
         y.append(data)
