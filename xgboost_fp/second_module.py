@@ -139,7 +139,7 @@ def Tune_stage2(xgboost_scores, X_train, Y_train, X_test, Y_test, model):  # Fro
         for KK in K_increament:
             for N in NN:
                 # initial N=sort
-                K = []
+
                 K = map(lambda x: x * KK, list(range(len(SNPs_indices_sorted_main) // 2)))
                 returned_sorted4 = second_cal_XGboost_feature_importance4(X_train, Y_train, SNPs_indices_sorted_main, M,
                                                                           K, N, model_Tune_stage2, X_test, Y_test)
@@ -188,6 +188,8 @@ def main(X,Y):
     # X = X.values.astype(np.int64)
     #we need the values without the numpy header
     X.drop([0,1],axis=1,inplace=True)
+
+
     # X = X[1:,:]
 
     print(X)
@@ -243,12 +245,13 @@ def main(X,Y):
         model = build_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
     #   print(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
         best_indices_cv_auc_recall = list()
-
+        print("Printing train and test")
+        print(train,test)
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
-            X_train = x[train]
+            X_train = x.iloc[train]
             Y_train = y[train]
-            X_test = x[test]
+            X_test = x.iloc[test]
             Y_test = y[test]
 
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
