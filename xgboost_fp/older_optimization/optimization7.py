@@ -15,7 +15,7 @@ np.random.seed(0)
 # Note heterozygous and homozygous minor are encoded as 0, 1, and 2, respectively.
 # Functions
 def model_XGboost(n_estimators, max_depth, learning_rate):
-    model_x = XGBClassifier(nthread=64, seed=0, n_estimators=n_estimators, max_depth=max_depth,
+    model_x = XGBClassifier(nthread=8, seed=0, n_estimators=n_estimators, max_depth=max_depth,
                             learning_rate=learning_rate)
     return model_x
 
@@ -80,7 +80,7 @@ def main(X,Y):
 
         model = model_XGboost(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best])
 
-        grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=1, cv=cv, verbose=1)
+        grid_search = GridSearchCV(model, param_grid, scoring="neg_log_loss", n_jobs=16, cv=cv, verbose=1)
         grid_result = grid_search.fit(x, y)
         tot_grid_results.append(grid_result)
         best_grid_results.append([grid_result.best_score_, grid_result.best_params_])

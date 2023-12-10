@@ -28,6 +28,9 @@ np.random.seed(0)
 def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)
+
+    # usecols = lambda column: column not in columns_to_skip
+    # columns_to_skip = ['FID', 'IID', 'PAT', 'MAT', 'SEX']
     df = pd.read_csv(X, chunksize=5, skiprows=1, header=None, low_memory=False,sep=" ",dtype='int8')
     y = list()
     counter = 1
