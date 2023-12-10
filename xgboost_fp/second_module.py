@@ -29,6 +29,7 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
 
     model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
+    print(X_train, Y_train)
     # The function was changed from booster() to get_booster()
     print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
     return model_XGboost.get_booster().get_score(importance_type='gain')
@@ -250,11 +251,11 @@ def main(X,Y):
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
             X_train = x.iloc[train,:]
-            Y_train = y[train]
+            Y_train = y[train,:]
             X_test = x.iloc[test,:]
-            Y_test = y[test]
+            Y_test = y[train,:]
 
-            print(X_train,train,X_test,test,)
+            print(X_train,train,X_test,test,Y_train,Y_test)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
             print("xgboost_scores1",xgboost_scores1)
             best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
