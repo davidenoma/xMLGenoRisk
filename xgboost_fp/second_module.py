@@ -253,7 +253,7 @@ def main(X,Y):
             X_train = x.iloc[train,:]
             Y_train = y[train]
             X_test = x.iloc[test,:]
-            Y_test = y[train]
+            Y_test = y[test]
 
             print(X_train,train,X_test,test,Y_train,Y_test)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
