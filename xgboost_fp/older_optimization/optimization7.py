@@ -22,20 +22,29 @@ def model_XGboost(n_estimators, max_depth, learning_rate):
 def main(X,Y):
 
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False,verbose=True)
+    df = pd.read_csv(X, chunksize=5, skiprows=1, header=None, low_memory=False,sep=" ",dtype='int8')
     y = list()
     counter = 1
     for data in df:
         # removing the extreme snp
+
         data = data.drop([data.shape[1] - 1], axis=1)
         print("Chunk Number: ",counter)
         y.append(data)
         counter = counter+1
     final = pd.concat([data for data in y], ignore_index=True)
     X=final
-    X = X.values.astype(np.int64)
+    print(X.head(),X.shape)
+    # X = X.values.astype(np.int64)
     #we need the values without the numpy header
-    X = X[1:,:]
+    X.drop([0,1],axis=1,inplace=True)
+    # X = X[1:,:]
+
+    print(X)
+
+
+
+
     print(' DONE READING')
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
@@ -69,7 +78,7 @@ def main(X,Y):
         print('testing trial',i)
         x, x_cv, y, y_cv = train_test_split(X, Y, test_size=0.2, train_size=0.8, stratify=Y,
                                             random_state=i)
-        # optimizing xgboost parameters: never seen on x_cv and y_cv
+        # optimizing xgboost parameters: never seend on x_cv and y_cv
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
         # Comparison
         temp_vec_log = [-best0[i][0], -best1[i][0], -best2[i][0]]  # lower the better
