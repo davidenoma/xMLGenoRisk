@@ -249,12 +249,12 @@ def main(X,Y):
 
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
-            X_train = x.iloc[train].values
+            X_train = x.iloc[train,:]
             Y_train = y[train]
-            X_test = x.iloc[test].values
+            X_test = x.iloc[test,:]
             Y_test = y[test]
 
-            print(X_train,train,X_test,test,X_train.values,)
+            print(X_train,train,X_test,test,)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
             print("xgboost_scores1",xgboost_scores1)
             best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
