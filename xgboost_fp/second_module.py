@@ -188,6 +188,9 @@ def main(X,Y):
     # X = X.values.astype(np.int64)
     #we need the values without the numpy header
     X.drop([0,1],axis=1,inplace=True)
+    old_X_with_indexes = X
+
+    X.reset_index(drop=True, inplace=True)
 
     print(X)
 
