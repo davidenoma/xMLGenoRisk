@@ -190,7 +190,7 @@ def main(X,Y):
     X.drop([0,1],axis=1,inplace=True)
     old_X_with_indexes = X
 
-    X.reset_index(drop=True, inplace=True)
+    # X.reset_index(drop=True, inplace=True)
 
     print(X)
 
@@ -249,9 +249,9 @@ def main(X,Y):
 
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
-            X_train = x[train]
+            X_train = x.iloc[train].values
             Y_train = y[train]
-            X_test = x[test]
+            X_test = x.iloc[test].values
             Y_test = y[test]
 
             print(X_train,train,X_test,test,X_train.values,)
