@@ -246,13 +246,14 @@ def main(X,Y):
     #   print(temp_n_est[inx_best], temp_max_depth[inx_best], temp_lr[inx_best], temp_subsample[inx_best1])
         best_indices_cv_auc_recall = list()
         print("Printing train and test")
-        print(train,test)
+
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
             X_train = x.iloc[train]
             Y_train = y[train]
             X_test = x.iloc[test]
             Y_test = y[test]
+            print(train, test)
 
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
             print("xgboost_scores1",xgboost_scores1)
