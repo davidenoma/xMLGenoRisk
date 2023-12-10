@@ -189,9 +189,6 @@ def main(X,Y):
     #we need the values without the numpy header
     X.drop([0,1],axis=1,inplace=True)
 
-
-    # X = X[1:,:]
-
     print(X)
 
     # save numpy array as npz file
@@ -249,12 +246,12 @@ def main(X,Y):
 
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
-            X_train = x.iloc[train]
+            X_train = x[train]
             Y_train = y[train]
-            X_test = x.iloc[test]
+            X_test = x[test]
             Y_test = y[test]
 
-            print(X_train,train,X_test,test)
+            print(X_train,train,X_test,test,X_train.values,)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
             print("xgboost_scores1",xgboost_scores1)
             best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
