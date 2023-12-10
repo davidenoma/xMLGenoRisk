@@ -51,8 +51,6 @@ def main(X,Y):
     Y = Y.values.astype(np.int64)
     Y  = Y.ravel()
 
-    print(X,X.shape,X.dtype)
-    print(Y.shape,Y.dtype)
 
     f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
     best0 = pickle.load(f)
