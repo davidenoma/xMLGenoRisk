@@ -173,7 +173,7 @@ def build_XGboost(n_estimatorss, max_depthh, learning_ratee, subsamplee):
 def main(X,Y):
     # Load and convert to numpy
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=5, header=None, low_memory=False, verbose=True)
+    df = pd.read_csv(X, chunksize=5, skiprows=1, header=None, low_memory=False, sep=" ", dtype='int8')
     y = list()
     counter = 1
     for data in df:
