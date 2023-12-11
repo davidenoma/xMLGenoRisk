@@ -26,10 +26,11 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     #fitting an XGBoost model and returning feature importance (gain)
     model_XGboost = clone(model)
     eval_set = [(x_test, y_test)]
+    print(X_train, Y_train)
 
     model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
-    print(X_train, Y_train)
+
     # The function was changed from booster() to get_booster()
     print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
     return model_XGboost.get_booster().get_score(importance_type='gain')
@@ -116,6 +117,7 @@ def second_cal_XGboost_feature_importance4(XX_train, YY_train, SNPs_indices_sort
             SNPs_indices_sorted[M + i - N:M + i] = M_bottom[0:N]  # exchange N best M_bottom with N worst M_top
             SNPs_indices_sorted[len(SNPs_indices_sorted) - M - i:len(SNPs_indices_sorted) - M - i + N] = M_top[
                                                                                                          M + i - N:M + i]  # exchange N worst M_top with N best M_bottom
+            temp = SNPs_indices_sorted
             temp = SNPs_indices_sorted
 
     return temp
@@ -255,7 +257,7 @@ def main(X,Y):
             X_test = x.iloc[test,:]
             Y_test = y[test]
 
-            print(X_train,train,X_test,test,Y_train,Y_test)
+            # print(X_train,train,X_test,test,Y_train,Y_test)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
             print("xgboost_scores1",xgboost_scores1)
             best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
