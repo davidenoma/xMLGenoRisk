@@ -257,7 +257,7 @@ def main(X,Y):
             X_test = x.iloc[test,:]
             Y_test = y[test]
 
-            # print(X_train,train,X_test,test,Y_train,Y_test)
+            print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
             print("xgboost_scores1",xgboost_scores1)
             best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
