@@ -28,7 +28,7 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     eval_set = [(x_test, y_test)]
     print(X_train, Y_train)
 
-    model.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model.n_estimators ,
+    model.fit(X_train, Y_train, verbose=True,  eval_metric="auc" ,
                       eval_set=eval_set)
 
     # The function was changed from booster() to get_booster()
