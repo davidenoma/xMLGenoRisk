@@ -29,32 +29,24 @@ def main(X,Y):
     #Load and convert to numpy
     # X = pd.read_csv(X, header=None)
 
-    # usecols = lambda column: column not in columns_to_skip
-    # columns_to_skip = ['FID', 'IID', 'PAT', 'MAT', 'SEX']
-    df = pd.read_csv(X, chunksize=5, skiprows=1, header=None, low_memory=False,sep=" ",dtype='int8')
+    columns_to_skip = ['FID', 'IID', 'PAT', 'MAT', 'SEX','PHENOTYPE']
+    df = pd.read_csv(X, chunksize=50, skiprows=1, header=None, low_memory=False,sep=" ",dtype='int8',usecols=lambda column: column not in columns_to_skip,)
     y = list()
     counter = 1
     for data in df:
         # removing the extreme snp
-
         data = data.drop([data.shape[1] - 1], axis=1)
         print("Chunk Number: ",counter)
         y.append(data)
         counter = counter+1
     final = pd.concat([data for data in y], ignore_index=True)
     X=final
-    print(X.head(),X.shape)
-    # X = X.values.astype(np.int64)
-    #we need the values without the numpy header
-    X.drop([0,1],axis=1,inplace=True)
-    # X = X[1:,:]
-
-    print(X)
+    print(X,X.head(),X.shape)
 
     # save numpy array as npz file
     savez_compressed('genotype.npz', X)
 
-    print(' DONE READING')
+    print('DONE READING')
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
     Y = Y.values.astype(np.int64)

@@ -28,11 +28,11 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     eval_set = [(x_test, y_test)]
     print(X_train, Y_train)
 
-    model.fit(X_train, Y_train, verbose=True,  eval_metric="auc" ,
+    model.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model.n_estimators ,
                       eval_set=eval_set)
 
     # The function was changed from booster() to get_booster()
-    print("Feature importance scores", model.get_booster().get_score(importance_type='gain'))
+    print("Feature importance scores", model.get_booster().get_scores(importance_type='gain'))
     return model.get_booster().get_score(importance_type='gain')
 
 
@@ -254,6 +254,7 @@ def main(X,Y):
         for train, test in cv.split(x, y):
             X_train = x.iloc[train,:]
             Y_train = y[train]
+
             X_test = x.iloc[test,:]
             Y_test = y[test]
 
