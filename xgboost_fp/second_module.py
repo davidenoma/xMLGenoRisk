@@ -31,7 +31,7 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
 
     model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
-
+    print(model_XGboost)
     # The function was changed from booster() to get_booster()
     print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
     return model_XGboost.get_booster().get_score(importance_type='gain')
