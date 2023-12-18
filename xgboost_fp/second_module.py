@@ -24,16 +24,16 @@ np.random.seed(0)
 # Stage 2 functions
 def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     #fitting an XGBoost model and returning feature importance (gain)
-    # model_XGboost = clone(model)
+    model_XGboost = clone(model)
     eval_set = [(x_test, y_test)]
     print(X_train, Y_train)
 
-    model.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model.n_estimators ,
+    model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
 
     # The function was changed from booster() to get_booster()
-    print("Feature importance scores", model.get_booster().get_score(importance_type='gain'))
-    return model.get_booster().get_score(importance_type='gain')
+    print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
+    return model_XGboost.get_booster().get_score(importance_type='gain')
 
 
 def all_results_SVM(XX_train, YY_train, XX_validation, YY_validation, indices, model):
@@ -175,7 +175,7 @@ def build_XGboost(n_estimatorss, max_depthh, learning_ratee, subsamplee):
 # Tuning
 def main(X,Y):
     # Load and convert to numpy
-    # X = pd.read_csv(X, header=None)
+
     df = pd.read_csv(X, chunksize=50, skiprows=1, header=None, low_memory=False, sep=" ", dtype='int8')
     y = list()
     counter = 1
