@@ -244,9 +244,9 @@ def main(X,Y):
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
             X_train = x.iloc[train, :]
-            Y_train = y[train]
+            Y_train = y.iloc[train]
             X_test = x.iloc[test, :]
-            Y_test = y[test]
+            Y_test = y.iloc[test]
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
