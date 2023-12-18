@@ -245,9 +245,9 @@ def main(X,Y):
         for train, test in cv.split(x, y):
             print(type(train), type(test), type(x), type(y))
             X_train = x.iloc[train, :]
-            Y_train = y.values[train]
+            Y_train = y[train]
             X_test = x.iloc[test, :]
-            Y_test = y.values[test]
+            Y_test = y[test]
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
