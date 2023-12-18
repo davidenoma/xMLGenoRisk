@@ -176,37 +176,28 @@ def build_XGboost(n_estimatorss, max_depthh, learning_ratee, subsamplee):
 def main(X,Y):
     # Load and convert to numpy
 
-    df = pd.read_csv(X, chunksize=50, skiprows=1, header=None, low_memory=False, sep=" ", dtype='int8')
+    columns_to_skip = ['FID', 'IID', 'PAT', 'MAT', 'SEX','PHENOTYPE']
+    df = pd.read_csv(X, chunksize=50, skiprows=1, header=None, low_memory=False, sep=" ", dtype='int8',
+                     usecols=lambda column: column not in columns_to_skip, )
     y = list()
     counter = 1
     for data in df:
         # removing the extreme snp
         data = data.drop([data.shape[1] - 1], axis=1)
-        print("Chunk Number: ",counter)
+        print("Chunk Number: ", counter)
         y.append(data)
-        counter = counter+1
+        counter = counter + 1
     final = pd.concat([data for data in y], ignore_index=True)
-    X=final
-    print(X.head(),X.shape)
-    # # X = X.values.astype(np.int64)
-    # #we need the values without the numpy header
-    # X.drop([0,1],axis=1,inplace=True)
-    old_X_with_indexes = X
+    X = final
+    print(X, X.head(), X.shape)
 
-    # X.reset_index(drop=True, inplace=True)
 
-    print(X)
-
-    # save numpy array as npz file
-    # savez_compressed('genotype.npz', X)
 
     print(' DONE READING')
     Y = pd.read_csv(Y, header=None)
     Y.replace([1, 2], [0, 1], inplace=True)
     Y = Y.values.astype(np.int64)
-    Y = Y.ravel()
-    print(Y.shape, Y.dtype)
-
+    Y  = Y.ravel()
     # XGBoost achieved optimal hyperparameters [log_loss, {learning_rate, max_depth, n_estimators}]
     # for 10 iterative process.
     f = open('best_grid_results_stage1_kuopio_0.pckl', 'rb')
@@ -252,9 +243,9 @@ def main(X,Y):
 
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
-            X_train = x[train]
+            X_train = x.iloc[train, :]
             Y_train = y[train]
-            X_test = x[test]
+            X_test = x.iloc[test, :]
             Y_test = y[test]
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
