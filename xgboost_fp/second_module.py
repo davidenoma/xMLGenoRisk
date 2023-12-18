@@ -32,7 +32,7 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
                       eval_set=eval_set)
 
     # The function was changed from booster() to get_booster()
-    print("Feature importance scores", model.get_booster().get_scores(importance_type='gain'))
+    print("Feature importance scores", model.get_booster().get_score(importance_type='gain'))
     return model.get_booster().get_score(importance_type='gain')
 
 
@@ -176,7 +176,7 @@ def build_XGboost(n_estimatorss, max_depthh, learning_ratee, subsamplee):
 def main(X,Y):
     # Load and convert to numpy
     # X = pd.read_csv(X, header=None)
-    df = pd.read_csv(X, chunksize=5, skiprows=1, header=None, low_memory=False, sep=" ", dtype='int8')
+    df = pd.read_csv(X, chunksize=50, skiprows=1, header=None, low_memory=False, sep=" ", dtype='int8')
     y = list()
     counter = 1
     for data in df:
@@ -188,9 +188,9 @@ def main(X,Y):
     final = pd.concat([data for data in y], ignore_index=True)
     X=final
     print(X.head(),X.shape)
-    # X = X.values.astype(np.int64)
-    #we need the values without the numpy header
-    X.drop([0,1],axis=1,inplace=True)
+    # # X = X.values.astype(np.int64)
+    # #we need the values without the numpy header
+    # X.drop([0,1],axis=1,inplace=True)
     old_X_with_indexes = X
 
     # X.reset_index(drop=True, inplace=True)
