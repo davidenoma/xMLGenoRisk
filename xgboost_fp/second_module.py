@@ -31,7 +31,7 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
 
     model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
-    print(model_XGboost)
+    print(model_XGboost,X_train.columns)
     # The function was changed from booster() to get_booster()
     print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
     return model_XGboost.get_booster().get_score(importance_type='gain')
@@ -253,7 +253,22 @@ def main(X,Y):
             Y_test = y[test]
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
+
+            model = XGBClassifier(nthread=16, seed=0, n_estimators=100, max_depth=2,
+                                  learning_rate=0.001, subsample=0.1)
+
+            eval_set = [(X_test, Y_test)]
+            # print(X_train, y_train)
+            # print(X_train,y_train,X_train.shape, y_train.shape)
+            print("trying Vanilla implementation: ")
+            print(model, X_train.columns)
+            model.fit(X_train, Y_train, verbose=True, eval_metric="auc",
+                      eval_set=eval_set)
+
+            # The function was changed from booster() to get_booster()
+            print("Feature importance scores:from vanilla model", model.get_booster().get_score(importance_type='gain'))
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
+
             print("xgboost_scores1",xgboost_scores1)
             best_indices_au_recall = Tune_stage2(xgboost_scores1, X_train, Y_train, X_test, Y_test, model)
             best_indices_cv_auc_recall.append(best_indices_au_recall)
