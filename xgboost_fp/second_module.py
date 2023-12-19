@@ -248,10 +248,10 @@ def main(X,Y):
         # Important: same train and test split as xgboost optimization codes  by fixing random seed
         for train, test in cv.split(x, y):
             print(type(train), type(test), type(x), type(y))
-            X_train = x.iloc[train, :]
+            X_train = x[train]
             Y_train = y[train]
 
-            X_test = x.iloc[test, :]
+            X_test = x.iloc[test]
             Y_test = y[test]
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
