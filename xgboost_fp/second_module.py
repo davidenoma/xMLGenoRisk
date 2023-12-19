@@ -193,7 +193,7 @@ def main(X,Y):
     X = final.to_numpy()
     #trying numpt
 
-    print(X, X.head(), X.shape)
+    print(X, X.shape)
 
 
 
