@@ -33,7 +33,7 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
                       eval_set=eval_set)
 
     # The function was changed from booster() to get_booster()
-    print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
+    # print("Feature importance scores", model_XGboost.get_booster().get_score(importance_type='gain'))
     return model_XGboost.get_booster().get_score(importance_type='gain')
 
 
@@ -251,7 +251,7 @@ def main(X,Y):
             X_train = x[train]
             Y_train = y[train]
 
-            X_test = x.iloc[test]
+            X_test = x[test]
             Y_test = y[test]
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
