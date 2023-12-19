@@ -200,7 +200,7 @@ def main(X,Y):
 
     #trying numpt
 
-    print(X, X.shape)
+    print(X, X.shape, X[:5, :])
 
 
 
