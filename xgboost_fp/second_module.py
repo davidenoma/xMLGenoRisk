@@ -28,7 +28,11 @@ def cal_XGboost(X_train, Y_train, model, x_test, y_test):
     eval_set = [(x_test, y_test)]
     print(X_train, Y_train)
     print(X_train.shape, Y_train.shape,eval_set)
-
+    # Write X_train, Y_train, X_test, and Y_test to text files
+    np.savetxt('X_train.txt', X_train)
+    np.savetxt('Y_train.txt', Y_train)
+    np.savetxt('X_test.txt', x_test)
+    np.savetxt('Y_test.txt', y_test)
     model_XGboost.fit(X_train, Y_train, verbose=True,  eval_metric="auc", early_stopping_rounds=model_XGboost.n_estimators ,
                       eval_set=eval_set)
     print(model_XGboost)
@@ -192,6 +196,8 @@ def main(X,Y):
         counter = counter + 1
     final = pd.concat([data for data in y], ignore_index=True)
     X = final.to_numpy()
+    X = X[:, 3:]
+
     #trying numpt
 
     print(X, X.shape)
@@ -257,14 +263,6 @@ def main(X,Y):
 
             print(X_train.shape,X_test.shape,Y_train.shape,Y_test.shape)
             #trying Vanilla
-
-            model = XGBClassifier(nthread=16, seed=0, n_estimators=100, max_depth=2,
-                                  learning_rate=0.001, subsample=0.1)
-            eval_set = [(X_test, Y_test)]
-            model.fit(X_train, Y_train, verbose=True, eval_metric="auc",
-                      eval_set=eval_set)
-            print("Feature importance scores for the vanilla", model.get_booster().get_score(importance_type='gain'))
-
 
             xgboost_scores1 = cal_XGboost(X_train, Y_train, model, X_test, Y_test)
 
